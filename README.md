@@ -23,4 +23,4 @@ A minimalistic typing test application inspired by Monkeytype.
 - Multiplayer mode
 - Leaderboards
 - Detailed statistics
-# TutleType
+
