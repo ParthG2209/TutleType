@@ -4,13 +4,14 @@ class TypingEngine {
         this.currentWordIndex = 0;
         this.currentCharIndex = 0;
         this.input = '';
-        this.wordInputs = []; // Track input for each word
+        this.wordInputs = [];
         this.correctChars = 0;
         this.incorrectChars = 0;
         this.startTime = null;
         this.endTime = null;
         this.timerInterval = null;
         this.isTestActive = false;
+        this.isTestComplete = false;
         this.mode = 'time';
         this.modeValue = 30;
         this.currentTime = 30;
@@ -33,6 +34,7 @@ class TypingEngine {
         this.startTime = null;
         this.endTime = null;
         this.isTestActive = false;
+        this.isTestComplete = false;
         this.currentTime = this.mode === 'time' ? this.modeValue : 0;
         
         if (this.timerInterval) {
@@ -50,7 +52,7 @@ class TypingEngine {
     }
 
     start() {
-        if (!this.isTestActive) {
+        if (!this.isTestActive && !this.isTestComplete) {
             this.isTestActive = true;
             this.startTime = Date.now();
             
@@ -62,16 +64,23 @@ class TypingEngine {
 
     startTimer() {
         this.timerInterval = setInterval(() => {
-            this.currentTime--;
-            this.updateStats();
-            
-            if (this.currentTime <= 0) {
-                this.finish();
+            if (this.currentTime > 0) {
+                this.currentTime--;
+                this.updateStats();
+                
+                if (this.currentTime <= 0) {
+                    this.finish();
+                }
             }
         }, 1000);
     }
 
     handleInput(char) {
+        // Block input if test is complete
+        if (this.isTestComplete) {
+            return;
+        }
+
         if (!this.isTestActive) {
             this.start();
         }
@@ -100,11 +109,15 @@ class TypingEngine {
         this.render();
         this.updateStats();
         
-        // Use requestAnimationFrame for smooth caret update
         requestAnimationFrame(() => this.updateCaret());
     }
 
     handleSpace() {
+        // Block input if test is complete
+        if (this.isTestComplete) {
+            return;
+        }
+
         if (!this.isTestActive) {
             this.start();
         }
@@ -113,7 +126,6 @@ class TypingEngine {
             return;
         }
 
-        // Move to next word
         this.currentWordIndex++;
         this.currentCharIndex = 0;
         this.input = this.wordInputs[this.currentWordIndex] || '';
@@ -121,16 +133,19 @@ class TypingEngine {
         this.render();
         this.updateStats();
         
-        // Use requestAnimationFrame for smooth caret update
         requestAnimationFrame(() => this.updateCaret());
     }
 
     handleBackspace() {
+        // Block input if test is complete
+        if (this.isTestComplete) {
+            return;
+        }
+
         if (this.currentCharIndex > 0) {
             const currentWord = this.words[this.currentWordIndex];
             const removedChar = this.input[this.currentCharIndex - 1];
             
-            // Update stats
             if (this.currentCharIndex <= currentWord.length) {
                 if (removedChar === currentWord[this.currentCharIndex - 1]) {
                     this.correctChars--;
@@ -146,7 +161,6 @@ class TypingEngine {
             this.currentCharIndex--;
             
         } else if (this.currentWordIndex > 0) {
-            // Move to previous word
             this.currentWordIndex--;
             this.input = this.wordInputs[this.currentWordIndex] || '';
             this.currentCharIndex = this.input.length;
@@ -155,12 +169,12 @@ class TypingEngine {
         this.render();
         this.updateStats();
         
-        // Use requestAnimationFrame for smooth caret update
         requestAnimationFrame(() => this.updateCaret());
     }
 
     finish() {
         this.isTestActive = false;
+        this.isTestComplete = true;
         this.endTime = Date.now();
         
         if (this.timerInterval) {
@@ -188,7 +202,8 @@ class TypingEngine {
 
     getElapsedTime() {
         if (this.mode === 'time') {
-            return this.modeValue - this.currentTime;
+            const elapsed = this.modeValue - this.currentTime;
+            return elapsed < 0 ? 0 : elapsed;
         } else {
             if (!this.startTime) return 0;
             const endTime = this.endTime || Date.now();
@@ -201,7 +216,8 @@ class TypingEngine {
         document.getElementById('accuracy').textContent = this.calculateAccuracy() + '%';
         
         if (this.mode === 'time') {
-            document.getElementById('timer').textContent = this.currentTime;
+            const displayTime = this.currentTime < 0 ? 0 : this.currentTime;
+            document.getElementById('timer').textContent = displayTime;
         } else {
             document.getElementById('timer').textContent = this.getElapsedTime();
         }
@@ -218,39 +234,26 @@ class TypingEngine {
                 wordHtml += ' active';
             }
             
-            const typedInput = this.wordInputs[wordIndex] || '';
-            let hasError = false;
-            
-            // Check if word has errors
-            for (let i = 0; i < Math.max(word.length, typedInput.length); i++) {
-                if (typedInput[i] !== word[i]) {
-                    hasError = true;
-                    break;
-                }
-            }
-            
-            if (hasError && wordIndex <= this.currentWordIndex) {
-                wordHtml += ' error';
-            }
-            
             wordHtml += '">';
             
-            // Render characters
+            const typedInput = this.wordInputs[wordIndex] || '';
             const maxLength = Math.max(word.length, wordIndex === this.currentWordIndex ? typedInput.length : 0);
             
+            // Render each character individually with its own color
             for (let charIndex = 0; charIndex < maxLength; charIndex++) {
-                const char = word[charIndex] || '';
+                const char = word[charIndex];
                 let className = 'char';
-                let displayChar = char;
+                let displayChar = char || '';
                 
                 if (wordIndex < this.currentWordIndex || 
                     (wordIndex === this.currentWordIndex && charIndex < this.currentCharIndex)) {
                     const typedChar = typedInput[charIndex];
                     
                     if (charIndex < word.length) {
+                        // Normal character - check if correct or incorrect
                         if (typedChar === char) {
                             className += ' correct';
-                        } else {
+                        } else if (typedChar !== undefined) {
                             className += ' incorrect';
                         }
                     } else {
@@ -258,10 +261,13 @@ class TypingEngine {
                         className += ' incorrect extra';
                         displayChar = typedInput[charIndex] || '';
                     }
+                } else if (charIndex < word.length) {
+                    // Untyped characters - keep default gray
+                    displayChar = char;
                 }
                 
                 if (displayChar) {
-                    wordHtml += `<span class="${className}" data-char-index="${charIndex}">${displayChar}</span>`;
+                    wordHtml += `<span class="${className}">${displayChar}</span>`;
                 }
             }
             
@@ -277,6 +283,7 @@ class TypingEngine {
         if (!caret) {
             caret = document.createElement('div');
             caret.id = 'caret';
+            caret.className = 'smooth';
             document.getElementById('text-display').appendChild(caret);
         }
 
@@ -293,24 +300,30 @@ class TypingEngine {
         const textDisplay = document.getElementById('text-display');
         const textDisplayRect = textDisplay.getBoundingClientRect();
         
-        if (this.currentCharIndex === 0 && chars.length > 0) {
-            // Position at start of first character
+        if (chars.length === 0) {
+            // If no characters in word yet, position at word start
+            const wordRect = currentWord.getBoundingClientRect();
+            caret.style.left = (wordRect.left - textDisplayRect.left) + 'px';
+            caret.style.top = (wordRect.top - textDisplayRect.top) + 'px';
+        } else if (this.currentCharIndex === 0) {
+            // Position before first character
             const firstChar = chars[0];
             const rect = firstChar.getBoundingClientRect();
             
             caret.style.left = (rect.left - textDisplayRect.left) + 'px';
             caret.style.top = (rect.top - textDisplayRect.top) + 'px';
             
-        } else if (this.currentCharIndex > 0 && this.currentCharIndex <= chars.length) {
-            // Position after the last typed character
-            const lastChar = chars[this.currentCharIndex - 1];
-            const rect = lastChar.getBoundingClientRect();
+        } else if (this.currentCharIndex <= chars.length) {
+            // Position after the previous character (to the right of it)
+            const prevChar = chars[this.currentCharIndex - 1];
+            const rect = prevChar.getBoundingClientRect();
             
+            // Position at the RIGHT edge of the previous character
             caret.style.left = (rect.right - textDisplayRect.left) + 'px';
             caret.style.top = (rect.top - textDisplayRect.top) + 'px';
             
-        } else if (chars.length > 0) {
-            // Position after last character if we've gone beyond
+        } else {
+            // Beyond word length - position after last character
             const lastChar = chars[chars.length - 1];
             const rect = lastChar.getBoundingClientRect();
             
