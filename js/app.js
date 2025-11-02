@@ -165,3 +165,25 @@ document.addEventListener('click', function(e) {
         userInput.focus();
     }
 });
+// ========== RESULTS SCREEN HANDLERS ==========
+document.getElementById('restart-test').addEventListener('click', function() {
+    const modeButton = document.querySelector('[data-mode-type].active');
+    const valueButton = document.querySelector('[data-value].active');
+    
+    const mode = modeButton ? modeButton.getAttribute('data-mode') : 'time';
+    const value = valueButton ? parseInt(valueButton.getAttribute('data-value')) : 30;
+    
+    typingEngine.init(mode, value);
+    document.getElementById('user-input').focus();
+});
+
+document.getElementById('close-results').addEventListener('click', function() {
+    typingEngine.hideResults();
+});
+
+// Close results on overlay click
+document.getElementById('results-overlay').addEventListener('click', function(e) {
+    if (e.target === this) {
+        typingEngine.hideResults();
+    }
+});

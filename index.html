@@ -140,5 +140,42 @@
     <script src="js/words.js"></script>
     <script src="js/typing-engine.js"></script>
     <script src="js/app.js"></script>
+        <!-- Results Overlay -->
+    <div id="results-overlay" class="results-overlay">
+        <div class="results-container">
+            <div class="results-header">
+                <h2 class="results-title">Test Complete!</h2>
+                <p class="results-subtitle">Here's how you performed</p>
+            </div>
+            
+            <div class="results-metrics">
+                <div class="metric-card">
+                    <div class="metric-value" id="result-wpm">0</div>
+                    <div class="metric-label">WPM</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value" id="result-accuracy">100%</div>
+                    <div class="metric-label">Accuracy</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-value error" id="result-errors">0%</div>
+                    <div class="metric-label">Errors</div>
+                </div>
+            </div>
+            
+            <div class="results-graph">
+                <h3 class="graph-title">WPM Over Time</h3>
+                <canvas id="performance-graph" class="graph-canvas"></canvas>
+            </div>
+            
+            <div class="results-actions">
+                <button class="results-button primary" id="restart-test">Try Again</button>
+                <button class="results-button secondary" id="close-results">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+
 </body>
 </html>
