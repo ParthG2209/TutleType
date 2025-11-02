@@ -11,18 +11,20 @@
     <!-- Header -->
     <div class="header-container">
         <div class="flex items-center justify-between max-w-7xl mx-auto">
-            <div class="flex items-center gap-2">
-                <div class="logo-circle"></div>
-                <div>
-                    <h1 class="logo-title">TutleType</h1>
-                    <p class="tagline">We dropped the 'R' to save you one keystroke.</p>
+            <a href="index.html" style="text-decoration: none; color: inherit; cursor: pointer;">
+                <div class="flex items-center gap-2">
+                    <div class="logo-circle"></div>
+                    <div>
+                        <h1 class="logo-title">TutleType</h1>
+                        <p class="tagline">We dropped the 'R' to save you one keystroke.</p>
+                    </div>
                 </div>
-            </div>
+            </a>
             
             <!-- Theme Selector -->
             <div style="position: relative;">
                 <button id="theme-button" class="theme-button">
-                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                     </svg>
                 </button>
@@ -80,9 +82,10 @@
         </div>
     </div>
 
-    <!-- Mode Controls -->
-    <div class="mode-controls">
-        <div class="flex items-center justify-center gap-5 max-w-7xl mx-auto">
+    <!-- Main Content -->
+    <div class="container mx-auto px-4 mt-10 max-w-3xl">
+        <!-- Mode Selection -->
+        <div class="flex items-center justify-center gap-6 mb-10">
             <div class="flex items-center gap-2">
                 <button class="mode-button active" data-mode-type="time" data-mode="time">time</button>
                 <button class="mode-button" data-mode-type="words" data-mode="words">words</button>
@@ -94,16 +97,14 @@
                 <button class="mode-button" data-value="120">120</button>
             </div>
             <button class="reset-button" id="reset-button">
-                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
             </button>
         </div>
-    </div>
 
-    <!-- Stats Display -->
-    <div class="stats-container">
-        <div class="flex justify-center gap-12 max-w-7xl mx-auto">
+        <!-- Stats Display -->
+        <div class="flex justify-center gap-14 mb-10 stats-container">
             <div class="text-center stat-item">
                 <div class="stat-value" id="wpm">0</div>
                 <div class="stat-label">wpm</div>
@@ -117,21 +118,17 @@
                 <div class="stat-label">time</div>
             </div>
         </div>
-    </div>
 
-    <!-- Text Display -->
-    <div class="typing-container">
-        <div id="typing-area">
+        <!-- Text Display (no box) -->
+        <div class="mb-6" id="typing-area">
             <div id="text-display"></div>
         </div>
-    </div>
 
-    <!-- Hidden Input -->
-    <input type="text" id="user-input" autocomplete="off" autocapitalize="off" autocorrect="off">
+        <!-- Hidden Input -->
+        <input type="text" id="user-input" autocomplete="off" autocapitalize="off" autocorrect="off">
 
-    <!-- Footer -->
-    <div class="footer-container">
-        <div class="text-center footer-text max-w-7xl mx-auto">
+        <!-- Footer -->
+        <div class="text-center footer-text mt-10">
             Fast, minimal, data-driven typing tests
         </div>
     </div>
@@ -140,42 +137,5 @@
     <script src="js/words.js"></script>
     <script src="js/typing-engine.js"></script>
     <script src="js/app.js"></script>
-        <!-- Results Overlay -->
-    <div id="results-overlay" class="results-overlay">
-        <div class="results-container">
-            <div class="results-header">
-                <h2 class="results-title">Test Complete!</h2>
-                <p class="results-subtitle">Here's how you performed</p>
-            </div>
-            
-            <div class="results-metrics">
-                <div class="metric-card">
-                    <div class="metric-value" id="result-wpm">0</div>
-                    <div class="metric-label">WPM</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value" id="result-accuracy">100%</div>
-                    <div class="metric-label">Accuracy</div>
-                </div>
-                <div class="metric-card">
-                    <div class="metric-value error" id="result-errors">0%</div>
-                    <div class="metric-label">Errors</div>
-                </div>
-            </div>
-            
-            <div class="results-graph">
-                <h3 class="graph-title">WPM Over Time</h3>
-                <canvas id="performance-graph" class="graph-canvas"></canvas>
-            </div>
-            
-            <div class="results-actions">
-                <button class="results-button primary" id="restart-test">Try Again</button>
-                <button class="results-button secondary" id="close-results">Close</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Scripts -->
-
 </body>
 </html>
