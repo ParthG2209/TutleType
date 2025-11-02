@@ -607,16 +607,15 @@ body {
 
 .results-graph-canvas {
     width: 100%;
-    height: 220px;
-    margin: 1rem 0;
+    height: 200px;
+    margin: 2rem 0;
 }
 
-.results-details-spread {
+.results-details {
     display: flex;
-    justify-content: space-between;
-    max-width: 100%;
+    justify-content: center;
+    gap: 3rem;
     flex-wrap: wrap;
-    gap: 2rem;
 }
 
 .results-detail-item {
@@ -624,36 +623,92 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 0.25rem;
-    flex: 1;
-    min-width: 120px;
 }
 
 .detail-label {
     font-size: 0.7rem;
     color: var(--text-secondary);
     transition: color 0.25s ease;
-    text-transform: lowercase;
 }
 
 .detail-value {
-    font-size: 1.25rem;
+    font-size: 1.125rem;
     color: var(--text-primary);
     font-weight: 500;
     font-variant-numeric: tabular-nums;
     transition: color 0.25s ease;
 }
 
+/* Comparison Section */
+.comparison-section {
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: opacity 0.3s ease, max-height 0.3s ease;
+}
+
+.comparison-section.show {
+    opacity: 1;
+    max-height: 200px;
+}
+
+.comparison-content {
+    padding: 1.5rem;
+    text-align: center;
+}
+
+.comparison-title {
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+    margin-bottom: 1rem;
+    text-transform: lowercase;
+}
+
+.comparison-stats {
+    display: flex;
+    justify-content: center;
+    gap: 4rem;
+}
+
+.comparison-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.comparison-label {
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.comparison-value {
+    font-size: 1.5rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.comparison-value.positive {
+    color: var(--accent-color);
+}
+
+.comparison-value.negative {
+    color: var(--error-color);
+}
+
+.comparison-value.neutral {
+    color: var(--text-primary);
+}
+
 @media (max-width: 768px) {
-    .results-details-spread {
-        justify-content: center;
+    .results-details {
         gap: 2rem;
-    }
-    
-    .results-detail-item {
-        min-width: 100px;
     }
     
     .results-graph-canvas {
         height: 150px;
+    }
+    
+    .comparison-stats {
+        gap: 2rem;
     }
 }

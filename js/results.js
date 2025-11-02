@@ -50,6 +50,35 @@ function updateActiveTheme(theme) {
 // Get results from localStorage
 const results = JSON.parse(localStorage.getItem('testResults') || '{}');
 
+// Save current test to history
+function saveToHistory() {
+    let history = JSON.parse(localStorage.getItem('testHistory') || '[]');
+    
+    const testRecord = {
+        wpm: results.wpm,
+        accuracy: results.accuracy,
+        errorRate: results.errorRate,
+        time: results.time,
+        totalChars: results.totalChars,
+        correctChars: results.correctChars,
+        incorrectChars: results.incorrectChars,
+        rawWpm: calculateRawWPM(),
+        consistency: calculateConsistency(),
+        peakWpm: calculatePeakWPM(),
+        avgWpm: calculateAvgWPM(),
+        timestamp: new Date().toISOString()
+    };
+    
+    history.unshift(testRecord); // Add to beginning
+    
+    // Keep only last 50 tests
+    if (history.length > 50) {
+        history = history.slice(0, 50);
+    }
+    
+    localStorage.setItem('testHistory', JSON.stringify(history));
+}
+
 // Calculate additional metrics
 function calculateRawWPM() {
     if (!results.time || results.time === 0) return 0;
@@ -77,14 +106,17 @@ function calculatePeakWPM() {
     return Math.max(...results.wpmHistory);
 }
 
+function calculateAvgWPM() {
+    if (!results.wpmHistory || results.wpmHistory.length === 0) return 0;
+    const sum = results.wpmHistory.reduce((a, b) => a + b, 0);
+    return Math.round(sum / results.wpmHistory.length);
+}
+
 // Display results
 if (results.wpm !== undefined) {
-    // Primary stats
     document.getElementById('result-wpm').textContent = results.wpm;
     document.getElementById('result-accuracy').textContent = results.accuracy + '%';
     document.getElementById('result-errors').textContent = results.errorRate + '%';
-    
-    // Secondary stats
     document.getElementById('result-time').textContent = results.time + 's';
     document.getElementById('result-chars').textContent = results.totalChars;
     document.getElementById('result-correct').textContent = results.correctChars;
@@ -92,6 +124,10 @@ if (results.wpm !== undefined) {
     document.getElementById('result-raw-wpm').textContent = calculateRawWPM();
     document.getElementById('result-consistency').textContent = calculateConsistency() + '%';
     document.getElementById('result-peak-wpm').textContent = calculatePeakWPM();
+    document.getElementById('result-avg-wpm').textContent = calculateAvgWPM();
+    
+    // Save to history
+    saveToHistory();
 }
 
 // Draw performance graph
@@ -120,7 +156,6 @@ function drawGraph() {
     const graphWidth = width - padding * 2;
     const graphHeight = height - padding * 2;
     
-    // Draw grid
     ctx.strokeStyle = textSecondary;
     ctx.globalAlpha = 0.1;
     ctx.lineWidth = 1;
@@ -134,8 +169,6 @@ function drawGraph() {
     }
     
     ctx.globalAlpha = 1;
-    
-    // Draw line
     ctx.strokeStyle = accentColor;
     ctx.lineWidth = 2;
     ctx.lineJoin = 'round';
@@ -155,7 +188,6 @@ function drawGraph() {
     
     ctx.stroke();
     
-    // Draw points
     ctx.fillStyle = accentColor;
     results.wpmHistory.forEach((wpm, index) => {
         const x = padding + (graphWidth / (results.wpmHistory.length - 1)) * index;
@@ -166,7 +198,6 @@ function drawGraph() {
         ctx.fill();
     });
     
-    // Draw axis labels
     ctx.fillStyle = textSecondary;
     ctx.font = '10px Roboto Mono';
     ctx.textAlign = 'right';
@@ -180,7 +211,69 @@ function drawGraph() {
 
 drawGraph();
 
-// Button handler
+// Screenshot functionality
+document.getElementById('screenshot-btn').addEventListener('click', function() {
+    const element = document.getElementById('results-content');
+    
+    html2canvas(element, {
+        backgroundColor: getComputedStyle(document.body).backgroundColor,
+        scale: 2
+    }).then(canvas => {
+        const link = document.createElement('a');
+        link.download = `tutletype-${results.wpm}wpm-${new Date().getTime()}.png`;
+        link.href = canvas.toDataURL();
+        link.click();
+    });
+});
+
+// Compare functionality
+document.getElementById('compare-btn').addEventListener('click', function() {
+    const comparisonSection = document.getElementById('comparison-section');
+    const history = JSON.parse(localStorage.getItem('testHistory') || '[]');
+    
+    if (comparisonSection.classList.contains('show')) {
+        comparisonSection.classList.remove('show');
+        return;
+    }
+    
+    if (history.length < 2) {
+        alert('Not enough test history to compare. Complete at least 2 tests!');
+        return;
+    }
+    
+    // Get last 10 tests (excluding current which is at index 0)
+    const last10 = history.slice(1, 11);
+    
+    if (last10.length === 0) {
+        alert('No previous tests to compare!');
+        return;
+    }
+    
+    const avgWpm = last10.reduce((sum, test) => sum + test.wpm, 0) / last10.length;
+    const avgAcc = last10.reduce((sum, test) => sum + test.accuracy, 0) / last10.length;
+    
+    const wpmChange = results.wpm - avgWpm;
+    const accChange = results.accuracy - avgAcc;
+    
+    const wpmChangeEl = document.getElementById('wpm-change');
+    const accChangeEl = document.getElementById('acc-change');
+    
+    wpmChangeEl.textContent = (wpmChange > 0 ? '+' : '') + wpmChange.toFixed(1);
+    wpmChangeEl.className = 'comparison-value ' + (wpmChange > 0 ? 'positive' : wpmChange < 0 ? 'negative' : 'neutral');
+    
+    accChangeEl.textContent = (accChange > 0 ? '+' : '') + accChange.toFixed(1) + '%';
+    accChangeEl.className = 'comparison-value ' + (accChange > 0 ? 'positive' : accChange < 0 ? 'negative' : 'neutral');
+    
+    comparisonSection.classList.remove('hidden');
+    comparisonSection.classList.add('show');
+});
+
+// History functionality
+document.getElementById('history-btn').addEventListener('click', function() {
+    window.location.href = 'history.html';
+});
+
+// Try again button
 document.getElementById('try-again').addEventListener('click', function() {
     window.location.href = 'index.html';
 });
