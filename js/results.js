@@ -65,7 +65,6 @@ function saveToHistory() {
         rawWpm: calculateRawWPM(),
         consistency: calculateConsistency(),
         peakWpm: calculatePeakWPM(),
-        avgWpm: calculateAvgWPM(),
         timestamp: new Date().toISOString()
     };
     
@@ -106,17 +105,14 @@ function calculatePeakWPM() {
     return Math.max(...results.wpmHistory);
 }
 
-function calculateAvgWPM() {
-    if (!results.wpmHistory || results.wpmHistory.length === 0) return 0;
-    const sum = results.wpmHistory.reduce((a, b) => a + b, 0);
-    return Math.round(sum / results.wpmHistory.length);
-}
-
 // Display results
 if (results.wpm !== undefined) {
+    // Primary stats
     document.getElementById('result-wpm').textContent = results.wpm;
     document.getElementById('result-accuracy').textContent = results.accuracy + '%';
     document.getElementById('result-errors').textContent = results.errorRate + '%';
+    
+    // Secondary stats (no avg wpm)
     document.getElementById('result-time').textContent = results.time + 's';
     document.getElementById('result-chars').textContent = results.totalChars;
     document.getElementById('result-correct').textContent = results.correctChars;
@@ -124,13 +120,12 @@ if (results.wpm !== undefined) {
     document.getElementById('result-raw-wpm').textContent = calculateRawWPM();
     document.getElementById('result-consistency').textContent = calculateConsistency() + '%';
     document.getElementById('result-peak-wpm').textContent = calculatePeakWPM();
-    document.getElementById('result-avg-wpm').textContent = calculateAvgWPM();
     
     // Save to history
     saveToHistory();
 }
 
-// Draw performance graph
+// Draw performance graph with axis labels
 function drawGraph() {
     const canvas = document.getElementById('performance-graph');
     if (!canvas || !results.wpmHistory || results.wpmHistory.length < 2) return;
@@ -150,12 +145,15 @@ function drawGraph() {
         .getPropertyValue('--accent-color').trim();
     const textSecondary = getComputedStyle(document.documentElement)
         .getPropertyValue('--text-secondary').trim();
+    const textPrimary = getComputedStyle(document.documentElement)
+        .getPropertyValue('--text-primary').trim();
     
     const maxWPM = Math.max(...results.wpmHistory, 10);
-    const padding = 30;
+    const padding = 40;
     const graphWidth = width - padding * 2;
     const graphHeight = height - padding * 2;
     
+    // Draw grid
     ctx.strokeStyle = textSecondary;
     ctx.globalAlpha = 0.1;
     ctx.lineWidth = 1;
@@ -169,6 +167,8 @@ function drawGraph() {
     }
     
     ctx.globalAlpha = 1;
+    
+    // Draw WPM line
     ctx.strokeStyle = accentColor;
     ctx.lineWidth = 2;
     ctx.lineJoin = 'round';
@@ -188,6 +188,7 @@ function drawGraph() {
     
     ctx.stroke();
     
+    // Draw points
     ctx.fillStyle = accentColor;
     results.wpmHistory.forEach((wpm, index) => {
         const x = padding + (graphWidth / (results.wpmHistory.length - 1)) * index;
@@ -198,6 +199,7 @@ function drawGraph() {
         ctx.fill();
     });
     
+    // Draw Y-axis labels (WPM values)
     ctx.fillStyle = textSecondary;
     ctx.font = '10px Roboto Mono';
     ctx.textAlign = 'right';
@@ -207,6 +209,22 @@ function drawGraph() {
         const y = padding + (graphHeight / 4) * i + 3;
         ctx.fillText(wpm, padding - 10, y);
     }
+    
+    // Y-axis label (vertical "words per minute")
+    ctx.save();
+    ctx.translate(15, height / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.textAlign = 'center';
+    ctx.fillStyle = textPrimary;
+    ctx.font = '11px Roboto Mono';
+    ctx.fillText('words per minute', 0, 0);
+    ctx.restore();
+    
+    // X-axis label ("time")
+    ctx.textAlign = 'right';
+    ctx.fillStyle = textPrimary;
+    ctx.font = '11px Roboto Mono';
+    ctx.fillText('time', width - padding, height - 10);
 }
 
 drawGraph();
