@@ -95,38 +95,46 @@ class TypingEngine {
     }
 
     handleInput(char) {
-        if (this.isTestComplete) {
-            return;
-        }
+    if (this.isTestComplete) {
+        return;
+    }
 
-        if (!this.isTestActive) {
-            this.start();
-        }
+    if (!this.isTestActive) {
+        this.start();
+    }
 
-        if (this.currentWordIndex >= this.words.length) {
-            return;
-        }
+    if (this.currentWordIndex >= this.words.length) {
+        return;
+    }
 
-        const currentWord = this.words[this.currentWordIndex];
-        this.input += char;
-        this.wordInputs[this.currentWordIndex] = this.input;
-        
-        if (this.currentCharIndex < currentWord.length) {
-            if (char === currentWord[this.currentCharIndex]) {
-                this.correctChars++;
-            } else {
-                this.incorrectChars++;
-            }
+    const currentWord = this.words[this.currentWordIndex];
+    this.input += char;
+    this.wordInputs[this.currentWordIndex] = this.input;
+    
+    if (this.currentCharIndex < currentWord.length) {
+        if (char === currentWord[this.currentCharIndex]) {
+            this.correctChars++;
         } else {
             this.incorrectChars++;
         }
-        
-        this.currentCharIndex++;
-        this.render();
-        this.updateStats();
-        
-        requestAnimationFrame(() => this.updateCaret());
+    } else {
+        this.incorrectChars++;
     }
+    
+    this.currentCharIndex++;
+    this.render();
+    this.updateStats();
+    
+    requestAnimationFrame(() => this.updateCaret());
+    
+    // Check if we just completed the last character of the last word
+    if (this.mode === 'words' && 
+        this.currentWordIndex === this.words.length - 1 && 
+        this.currentCharIndex === currentWord.length) {
+        this.finish();
+    }
+}
+
 
     handleSpace() {
     if (this.isTestComplete) {
@@ -137,12 +145,7 @@ class TypingEngine {
         this.start();
     }
 
-    // Check if we're at the last word
     if (this.currentWordIndex >= this.words.length - 1) {
-        // If in words mode and on the last word, finish the test
-        if (this.mode === 'words') {
-            this.finish();
-        }
         return;
     }
 
@@ -155,6 +158,7 @@ class TypingEngine {
     
     requestAnimationFrame(() => this.updateCaret());
 }
+
 
 
     handleBackspace() {
