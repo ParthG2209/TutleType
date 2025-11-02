@@ -592,184 +592,51 @@ body {
         font-size: 1.75rem;
     }
 }
-/* ========== RESULTS PAGE STYLES ========== */
-.results-page-header {
-    animation: fadeInUp 0.6s ease-out;
+/* ========== RESULTS PAGE STYLES (MINIMAL) ========== */
+.error-stat {
+    color: var(--error-color) !important;
 }
 
-.results-page-title {
-    font-size: 2.5rem;
-    font-weight: 700;
-    color: var(--text-primary);
-    margin-bottom: 0.5rem;
+.results-graph-canvas {
+    width: 100%;
+    height: 200px;
+    margin: 2rem 0;
 }
 
-.results-page-subtitle {
-    font-size: 1rem;
-    color: var(--text-secondary);
+.results-details {
+    display: flex;
+    justify-content: center;
+    gap: 3rem;
+    flex-wrap: wrap;
 }
 
-.results-page-metrics {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
-    margin-bottom: 2.5rem;
-    animation: fadeInUp 0.6s ease-out 0.1s both;
+.results-detail-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.25rem;
 }
 
-.metric-card-large {
-    background-color: var(--bg-secondary);
-    border-radius: 1rem;
-    padding: 2rem;
-    text-align: center;
-    transition: transform 0.3s ease;
-}
-
-.metric-card-large:hover {
-    transform: translateY(-5px);
-}
-
-.metric-icon {
-    font-size: 2.5rem;
-    margin-bottom: 1rem;
-}
-
-.metric-value-large {
-    font-size: 3rem;
-    font-weight: 700;
-    color: var(--accent-color);
-    margin-bottom: 0.5rem;
-    font-variant-numeric: tabular-nums;
-}
-
-.metric-value-large.error {
-    color: var(--error-color);
-}
-
-.metric-label-large {
-    font-size: 0.875rem;
-    color: var(--text-secondary);
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.results-page-stats-grid {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 1rem;
-    margin-bottom: 2.5rem;
-    animation: fadeInUp 0.6s ease-out 0.2s both;
-}
-
-.stat-item-small {
-    background-color: var(--bg-secondary);
-    border-radius: 0.75rem;
-    padding: 1.25rem;
-    text-align: center;
-}
-
-.stat-label-small {
+.detail-label {
     font-size: 0.7rem;
     color: var(--text-secondary);
-    margin-bottom: 0.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
+    transition: color 0.25s ease;
 }
 
-.stat-value-small {
-    font-size: 1.5rem;
-    font-weight: 600;
-    color: var(--text-primary);
-    font-variant-numeric: tabular-nums;
-}
-
-.results-page-graph {
-    background-color: var(--bg-secondary);
-    border-radius: 1rem;
-    padding: 2rem;
-    margin-bottom: 2.5rem;
-    animation: fadeInUp 0.6s ease-out 0.3s both;
-}
-
-.graph-title-large {
+.detail-value {
     font-size: 1.125rem;
     color: var(--text-primary);
-    margin-bottom: 1.5rem;
-    font-weight: 600;
-}
-
-.graph-canvas-large {
-    width: 100%;
-    height: 300px;
-}
-
-.results-page-actions {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    animation: fadeInUp 0.6s ease-out 0.4s both;
-}
-
-.results-button-large {
-    padding: 1rem 2rem;
-    border-radius: 0.75rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border: none;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    font-family: 'Roboto Mono', monospace;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-}
-
-.results-button-large.primary {
-    background-color: var(--accent-color);
-    color: var(--bg-primary);
-}
-
-.results-button-large.primary:hover {
-    transform: translateY(-3px);
-    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-}
-
-.results-button-large.secondary {
-    background-color: var(--bg-secondary);
-    color: var(--text-primary);
-}
-
-.results-button-large.secondary:hover {
-    background-color: var(--bg-primary);
-    transform: translateY(-3px);
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(30px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+    font-weight: 500;
+    font-variant-numeric: tabular-nums;
+    transition: color 0.25s ease;
 }
 
 @media (max-width: 768px) {
-    .results-page-metrics {
-        grid-template-columns: 1fr;
-        gap: 1rem;
+    .results-details {
+        gap: 2rem;
     }
     
-    .results-page-stats-grid {
-        grid-template-columns: repeat(2, 1fr);
-    }
-    
-    .results-page-actions {
-        flex-direction: column;
-    }
-    
-    .metric-value-large {
-        font-size: 2.5rem;
+    .results-graph-canvas {
+        height: 150px;
     }
 }

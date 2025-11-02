@@ -57,71 +57,69 @@
     </div>
 
     <!-- Results Content -->
-    <div class="container mx-auto px-4 mt-8 max-w-4xl">
-        <div class="results-page-header text-center mb-8">
-            <h2 class="results-page-title">Test Complete!</h2>
-            <p class="results-page-subtitle">Here's how you performed</p>
-        </div>
-        
-        <!-- Main Metrics -->
-        <div class="results-page-metrics">
-            <div class="metric-card-large">
-                <div class="metric-icon">⚡</div>
-                <div class="metric-value-large" id="result-wpm">0</div>
-                <div class="metric-label-large">Words Per Minute</div>
-            </div>
-            <div class="metric-card-large">
-                <div class="metric-icon">🎯</div>
-                <div class="metric-value-large" id="result-accuracy">100%</div>
-                <div class="metric-label-large">Accuracy</div>
-            </div>
-            <div class="metric-card-large">
-                <div class="metric-icon">❌</div>
-                <div class="metric-value-large error" id="result-errors">0%</div>
-                <div class="metric-label-large">Error Rate</div>
+    <div class="container mx-auto px-4 max-w-4xl">
+        <!-- Stats Display (Same style as main page) -->
+        <div class="stats-container" style="margin-top: 3rem;">
+            <div class="flex justify-center gap-12 max-w-7xl mx-auto">
+                <div class="text-center stat-item">
+                    <div class="stat-value" id="result-wpm">0</div>
+                    <div class="stat-label">wpm</div>
+                </div>
+                <div class="text-center stat-item">
+                    <div class="stat-value" id="result-accuracy">100%</div>
+                    <div class="stat-label">acc</div>
+                </div>
+                <div class="text-center stat-item">
+                    <div class="stat-value error-stat" id="result-errors">0%</div>
+                    <div class="stat-label">errors</div>
+                </div>
             </div>
         </div>
-        
-        <!-- Additional Stats -->
-        <div class="results-page-stats-grid">
-            <div class="stat-item-small">
-                <div class="stat-label-small">Time Taken</div>
-                <div class="stat-value-small" id="result-time">30s</div>
-            </div>
-            <div class="stat-item-small">
-                <div class="stat-label-small">Characters Typed</div>
-                <div class="stat-value-small" id="result-chars">0</div>
-            </div>
-            <div class="stat-item-small">
-                <div class="stat-label-small">Correct Characters</div>
-                <div class="stat-value-small" id="result-correct">0</div>
-            </div>
-            <div class="stat-item-small">
-                <div class="stat-label-small">Incorrect Characters</div>
-                <div class="stat-value-small" id="result-incorrect">0</div>
+
+        <!-- Performance Graph (Minimal) -->
+        <div class="typing-container" style="margin-top: 3rem; margin-bottom: 2rem;">
+            <canvas id="performance-graph" class="results-graph-canvas"></canvas>
+        </div>
+
+        <!-- Additional Details (Minimal) -->
+        <div class="typing-container" style="margin-bottom: 2rem;">
+            <div class="results-details">
+                <div class="results-detail-item">
+                    <span class="detail-label">time</span>
+                    <span class="detail-value" id="result-time">30s</span>
+                </div>
+                <div class="results-detail-item">
+                    <span class="detail-label">characters</span>
+                    <span class="detail-value" id="result-chars">0</span>
+                </div>
+                <div class="results-detail-item">
+                    <span class="detail-label">correct</span>
+                    <span class="detail-value" id="result-correct">0</span>
+                </div>
+                <div class="results-detail-item">
+                    <span class="detail-label">incorrect</span>
+                    <span class="detail-value" id="result-incorrect">0</span>
+                </div>
             </div>
         </div>
-        
-        <!-- Performance Graph -->
-        <div class="results-page-graph">
-            <h3 class="graph-title-large">Performance Over Time</h3>
-            <canvas id="performance-graph" class="graph-canvas-large"></canvas>
+
+        <!-- Action Buttons (Minimal) -->
+        <div class="mode-controls" style="margin-top: 2rem; margin-bottom: 3rem;">
+            <div class="flex items-center justify-center gap-3 max-w-7xl mx-auto">
+                <button class="mode-button" id="try-again">try again</button>
+                <button class="reset-button" id="go-home">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                    </svg>
+                </button>
+            </div>
         </div>
-        
-        <!-- Action Buttons -->
-        <div class="results-page-actions">
-            <button class="results-button-large primary" id="try-again">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Try Again
-            </button>
-            <button class="results-button-large secondary" id="go-home">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                </svg>
-                Back to Home
-            </button>
+
+        <!-- Footer -->
+        <div class="footer-container">
+            <div class="text-center footer-text max-w-7xl mx-auto">
+                Fast, minimal, data-driven typing tests
+            </div>
         </div>
     </div>
 

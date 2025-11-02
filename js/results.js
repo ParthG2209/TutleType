@@ -3,7 +3,6 @@ const themeButton = document.getElementById('theme-button');
 const themeDropdown = document.getElementById('theme-dropdown');
 let currentTheme = localStorage.getItem('theme') || 'serika-dark';
 
-// Apply saved theme on load
 document.body.className = `theme-${currentTheme} min-h-screen`;
 updateActiveTheme(currentTheme);
 
@@ -35,7 +34,6 @@ document.querySelectorAll('.theme-option').forEach(button => {
         themeDropdown.classList.add('hidden');
         themeDropdown.classList.remove('show');
         
-        // Redraw graph with new theme colors
         drawGraph();
     });
 });
@@ -83,21 +81,19 @@ function drawGraph() {
         .getPropertyValue('--accent-color').trim();
     const textSecondary = getComputedStyle(document.documentElement)
         .getPropertyValue('--text-secondary').trim();
-    const textPrimary = getComputedStyle(document.documentElement)
-        .getPropertyValue('--text-primary').trim();
     
     const maxWPM = Math.max(...results.wpmHistory, 10);
-    const padding = 50;
+    const padding = 30;
     const graphWidth = width - padding * 2;
     const graphHeight = height - padding * 2;
     
     // Draw grid
     ctx.strokeStyle = textSecondary;
-    ctx.globalAlpha = 0.15;
+    ctx.globalAlpha = 0.1;
     ctx.lineWidth = 1;
     
-    for (let i = 0; i <= 5; i++) {
-        const y = padding + (graphHeight / 5) * i;
+    for (let i = 0; i <= 4; i++) {
+        const y = padding + (graphHeight / 4) * i;
         ctx.beginPath();
         ctx.moveTo(padding, y);
         ctx.lineTo(width - padding, y);
@@ -108,7 +104,7 @@ function drawGraph() {
     
     // Draw line
     ctx.strokeStyle = accentColor;
-    ctx.lineWidth = 4;
+    ctx.lineWidth = 2;
     ctx.lineJoin = 'round';
     ctx.lineCap = 'round';
     ctx.beginPath();
@@ -133,25 +129,20 @@ function drawGraph() {
         const y = padding + graphHeight - (wpm / maxWPM) * graphHeight;
         
         ctx.beginPath();
-        ctx.arc(x, y, 5, 0, Math.PI * 2);
+        ctx.arc(x, y, 3, 0, Math.PI * 2);
         ctx.fill();
     });
     
     // Draw axis labels
-    ctx.fillStyle = textPrimary;
-    ctx.font = '12px Roboto Mono';
+    ctx.fillStyle = textSecondary;
+    ctx.font = '10px Roboto Mono';
     ctx.textAlign = 'right';
     
-    for (let i = 0; i <= 5; i++) {
-        const wpm = Math.round((maxWPM / 5) * (5 - i));
-        const y = padding + (graphHeight / 5) * i + 4;
-        ctx.fillText(wpm + ' wpm', padding - 10, y);
+    for (let i = 0; i <= 4; i++) {
+        const wpm = Math.round((maxWPM / 4) * (4 - i));
+        const y = padding + (graphHeight / 4) * i + 3;
+        ctx.fillText(wpm, padding - 10, y);
     }
-    
-    // X-axis label
-    ctx.textAlign = 'center';
-    ctx.fillStyle = textSecondary;
-    ctx.fillText('Time (seconds)', width / 2, height - 10);
 }
 
 drawGraph();
