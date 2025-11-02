@@ -125,7 +125,6 @@ if (results.wpm !== undefined) {
     saveToHistory();
 }
 
-// Draw performance graph with axis labels
 function drawGraph() {
     const canvas = document.getElementById('performance-graph');
     if (!canvas || !results.wpmHistory || results.wpmHistory.length < 2) return;
@@ -149,7 +148,7 @@ function drawGraph() {
         .getPropertyValue('--text-primary').trim();
     
     const maxWPM = Math.max(...results.wpmHistory, 10);
-    const padding = 40;
+    const padding = 45;  // Increased from 40 for more space
     const graphWidth = width - padding * 2;
     const graphHeight = height - padding * 2;
     
@@ -210,9 +209,9 @@ function drawGraph() {
         ctx.fillText(wpm, padding - 10, y);
     }
     
-    // Y-axis label (vertical "words per minute")
+    // Y-axis label (vertical "words per minute") - with more spacing
     ctx.save();
-    ctx.translate(15, height / 2);
+    ctx.translate(10, height / 2);
     ctx.rotate(-Math.PI / 2);
     ctx.textAlign = 'center';
     ctx.fillStyle = textPrimary;
@@ -226,6 +225,7 @@ function drawGraph() {
     ctx.font = '11px Roboto Mono';
     ctx.fillText('time', width - padding, height - 10);
 }
+
 
 drawGraph();
 
