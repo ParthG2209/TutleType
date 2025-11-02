@@ -48,11 +48,11 @@ function updateActiveTheme(theme) {
 }
 
 // Get results from localStorage
-const results = JSON.parse(localStorage.getItem('testResults') || '{}');
+const results = public/jsON.parse(localStorage.getItem('testResults') || '{}');
 
 // Save current test to history
 function saveToHistory() {
-    let history = JSON.parse(localStorage.getItem('testHistory') || '[]');
+    let history = public/jsON.parse(localStorage.getItem('testHistory') || '[]');
     
     const testRecord = {
         wpm: results.wpm,
@@ -75,7 +75,7 @@ function saveToHistory() {
         history = history.slice(0, 50);
     }
     
-    localStorage.setItem('testHistory', JSON.stringify(history));
+    localStorage.setItem('testHistory', public/jsON.stringify(history));
 }
 
 // Calculate additional metrics
@@ -247,7 +247,7 @@ document.getElementById('screenshot-btn').addEventListener('click', function() {
 // Compare functionality
 document.getElementById('compare-btn').addEventListener('click', function() {
     const comparisonSection = document.getElementById('comparison-section');
-    const history = JSON.parse(localStorage.getItem('testHistory') || '[]');
+    const history = public/jsON.parse(localStorage.getItem('testHistory') || '[]');
     
     if (comparisonSection.classList.contains('show')) {
         comparisonSection.classList.remove('show');

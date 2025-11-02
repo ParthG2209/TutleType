@@ -226,7 +226,7 @@ class TypingEngine {
         wpmHistory: this.wpmHistory
     };
     
-    localStorage.setItem('testResults', JSON.stringify(results));
+    localStorage.setItem('testResults', public/jsON.stringify(results));
     
     // Redirect to results page
     window.location.href = 'results.html';
