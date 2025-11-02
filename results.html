@@ -58,7 +58,7 @@
 
     <!-- Results Content -->
     <div class="container mx-auto px-4 max-w-4xl">
-        <!-- Primary Stats (Same style as main page) -->
+        <!-- Primary Stats -->
         <div class="stats-container" style="margin-top: 2.5rem;">
             <div class="flex justify-center gap-12 max-w-7xl mx-auto">
                 <div class="text-center stat-item">
@@ -77,13 +77,13 @@
         </div>
 
         <!-- Performance Graph -->
-        <div class="typing-container" style="margin-top: 2.5rem; margin-bottom: 2rem;">
+        <div class="typing-container" style="margin-top: 2.5rem; margin-bottom: 2.5rem;">
             <canvas id="performance-graph" class="results-graph-canvas"></canvas>
         </div>
 
-        <!-- Secondary Stats Row 1 -->
-        <div class="typing-container" style="margin-bottom: 1.5rem;">
-            <div class="results-details">
+        <!-- Secondary Stats (Spread out in 2 rows) -->
+        <div class="typing-container" style="margin-bottom: 2rem;">
+            <div class="results-details-spread">
                 <div class="results-detail-item">
                     <span class="detail-label">time</span>
                     <span class="detail-value" id="result-time">30s</span>
@@ -103,9 +103,8 @@
             </div>
         </div>
 
-        <!-- Secondary Stats Row 2 -->
-        <div class="typing-container" style="margin-bottom: 2rem;">
-            <div class="results-details">
+        <div class="typing-container" style="margin-bottom: 2.5rem;">
+            <div class="results-details-spread">
                 <div class="results-detail-item">
                     <span class="detail-label">raw wpm</span>
                     <span class="detail-value" id="result-raw-wpm">0</span>
@@ -117,10 +116,6 @@
                 <div class="results-detail-item">
                     <span class="detail-label">peak wpm</span>
                     <span class="detail-value" id="result-peak-wpm">0</span>
-                </div>
-                <div class="results-detail-item">
-                    <span class="detail-label">avg wpm</span>
-                    <span class="detail-value" id="result-avg-wpm">0</span>
                 </div>
             </div>
         </div>
