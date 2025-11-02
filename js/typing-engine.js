@@ -129,27 +129,33 @@ class TypingEngine {
     }
 
     handleSpace() {
-        if (this.isTestComplete) {
-            return;
-        }
-
-        if (!this.isTestActive) {
-            this.start();
-        }
-
-        if (this.currentWordIndex >= this.words.length - 1) {
-            return;
-        }
-
-        this.currentWordIndex++;
-        this.currentCharIndex = 0;
-        this.input = this.wordInputs[this.currentWordIndex] || '';
-        
-        this.render();
-        this.updateStats();
-        
-        requestAnimationFrame(() => this.updateCaret());
+    if (this.isTestComplete) {
+        return;
     }
+
+    if (!this.isTestActive) {
+        this.start();
+    }
+
+    // Check if we're at the last word
+    if (this.currentWordIndex >= this.words.length - 1) {
+        // If in words mode and on the last word, finish the test
+        if (this.mode === 'words') {
+            this.finish();
+        }
+        return;
+    }
+
+    this.currentWordIndex++;
+    this.currentCharIndex = 0;
+    this.input = this.wordInputs[this.currentWordIndex] || '';
+    
+    this.render();
+    this.updateStats();
+    
+    requestAnimationFrame(() => this.updateCaret());
+}
+
 
     handleBackspace() {
         if (this.isTestComplete) {
