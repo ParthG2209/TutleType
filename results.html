@@ -58,8 +58,8 @@
 
     <!-- Results Content -->
     <div class="container mx-auto px-4 max-w-4xl">
-        <!-- Stats Display (Same style as main page) -->
-        <div class="stats-container" style="margin-top: 3rem;">
+        <!-- Primary Stats (Same style as main page) -->
+        <div class="stats-container" style="margin-top: 2.5rem;">
             <div class="flex justify-center gap-12 max-w-7xl mx-auto">
                 <div class="text-center stat-item">
                     <div class="stat-value" id="result-wpm">0</div>
@@ -76,13 +76,13 @@
             </div>
         </div>
 
-        <!-- Performance Graph (Minimal) -->
-        <div class="typing-container" style="margin-top: 3rem; margin-bottom: 2rem;">
+        <!-- Performance Graph -->
+        <div class="typing-container" style="margin-top: 2.5rem; margin-bottom: 2rem;">
             <canvas id="performance-graph" class="results-graph-canvas"></canvas>
         </div>
 
-        <!-- Additional Details (Minimal) -->
-        <div class="typing-container" style="margin-bottom: 2rem;">
+        <!-- Secondary Stats Row 1 -->
+        <div class="typing-container" style="margin-bottom: 1.5rem;">
             <div class="results-details">
                 <div class="results-detail-item">
                     <span class="detail-label">time</span>
@@ -94,24 +94,41 @@
                 </div>
                 <div class="results-detail-item">
                     <span class="detail-label">correct</span>
-                    <span class="detail-value" id="result-correct">0</span>
+                    <span class="detail-value correct-color" id="result-correct">0</span>
                 </div>
                 <div class="results-detail-item">
                     <span class="detail-label">incorrect</span>
-                    <span class="detail-value" id="result-incorrect">0</span>
+                    <span class="detail-value error-color" id="result-incorrect">0</span>
                 </div>
             </div>
         </div>
 
-        <!-- Action Buttons (Minimal) -->
+        <!-- Secondary Stats Row 2 -->
+        <div class="typing-container" style="margin-bottom: 2rem;">
+            <div class="results-details">
+                <div class="results-detail-item">
+                    <span class="detail-label">raw wpm</span>
+                    <span class="detail-value" id="result-raw-wpm">0</span>
+                </div>
+                <div class="results-detail-item">
+                    <span class="detail-label">consistency</span>
+                    <span class="detail-value" id="result-consistency">0%</span>
+                </div>
+                <div class="results-detail-item">
+                    <span class="detail-label">peak wpm</span>
+                    <span class="detail-value" id="result-peak-wpm">0</span>
+                </div>
+                <div class="results-detail-item">
+                    <span class="detail-label">avg wpm</span>
+                    <span class="detail-value" id="result-avg-wpm">0</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Try Again Button (Centered) -->
         <div class="mode-controls" style="margin-top: 2rem; margin-bottom: 3rem;">
-            <div class="flex items-center justify-center gap-3 max-w-7xl mx-auto">
-                <button class="mode-button" id="try-again">try again</button>
-                <button class="reset-button" id="go-home">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
-                    </svg>
-                </button>
+            <div class="flex items-center justify-center max-w-7xl mx-auto">
+                <button class="mode-button active" id="try-again">try again</button>
             </div>
         </div>
 

@@ -50,15 +50,58 @@ function updateActiveTheme(theme) {
 // Get results from localStorage
 const results = JSON.parse(localStorage.getItem('testResults') || '{}');
 
+// Calculate additional metrics
+function calculateRawWPM() {
+    if (!results.time || results.time === 0) return 0;
+    const timeInMinutes = results.time / 60;
+    const totalCharsTyped = results.totalChars || 0;
+    const rawWords = totalCharsTyped / 5;
+    return Math.round(rawWords / timeInMinutes);
+}
+
+function calculateConsistency() {
+    if (!results.wpmHistory || results.wpmHistory.length < 2) return 100;
+    
+    const avg = results.wpmHistory.reduce((a, b) => a + b, 0) / results.wpmHistory.length;
+    const variance = results.wpmHistory.reduce((sum, wpm) => {
+        return sum + Math.pow(wpm - avg, 2);
+    }, 0) / results.wpmHistory.length;
+    const stdDev = Math.sqrt(variance);
+    
+    // Consistency is 100% minus the coefficient of variation
+    const consistency = 100 - ((stdDev / avg) * 100);
+    return Math.max(0, Math.min(100, Math.round(consistency)));
+}
+
+function calculatePeakWPM() {
+    if (!results.wpmHistory || results.wpmHistory.length === 0) return 0;
+    return Math.max(...results.wpmHistory);
+}
+
+function calculateAvgWPM() {
+    if (!results.wpmHistory || results.wpmHistory.length === 0) return 0;
+    const sum = results.wpmHistory.reduce((a, b) => a + b, 0);
+    return Math.round(sum / results.wpmHistory.length);
+}
+
 // Display results
 if (results.wpm !== undefined) {
+    // Primary stats
     document.getElementById('result-wpm').textContent = results.wpm;
     document.getElementById('result-accuracy').textContent = results.accuracy + '%';
     document.getElementById('result-errors').textContent = results.errorRate + '%';
+    
+    // Secondary stats row 1
     document.getElementById('result-time').textContent = results.time + 's';
     document.getElementById('result-chars').textContent = results.totalChars;
     document.getElementById('result-correct').textContent = results.correctChars;
     document.getElementById('result-incorrect').textContent = results.incorrectChars;
+    
+    // Secondary stats row 2
+    document.getElementById('result-raw-wpm').textContent = calculateRawWPM();
+    document.getElementById('result-consistency').textContent = calculateConsistency() + '%';
+    document.getElementById('result-peak-wpm').textContent = calculatePeakWPM();
+    document.getElementById('result-avg-wpm').textContent = calculateAvgWPM();
 }
 
 // Draw performance graph
@@ -147,11 +190,7 @@ function drawGraph() {
 
 drawGraph();
 
-// Button handlers
+// Button handler
 document.getElementById('try-again').addEventListener('click', function() {
-    window.location.href = 'index.html';
-});
-
-document.getElementById('go-home').addEventListener('click', function() {
     window.location.href = 'index.html';
 });
