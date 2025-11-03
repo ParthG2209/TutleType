@@ -144,9 +144,10 @@ userInput.addEventListener('keydown', function(e) {
     }
 });
 
-// Keep focus on input
+// Keep focus on input - REMOVED THE PROBLEMATIC CODE
+// Only focus on input if test is active and not complete
 document.addEventListener('click', function(e) {
-    if (!e.target.closest('button')) {
+    if (!e.target.closest('button') && typingEngine.isTestActive && !typingEngine.isTestComplete) {
         userInput.focus();
     }
 });

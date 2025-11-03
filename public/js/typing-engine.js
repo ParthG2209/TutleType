@@ -95,71 +95,68 @@ class TypingEngine {
     }
 
     handleInput(char) {
-    if (this.isTestComplete) {
-        return;
-    }
+        if (this.isTestComplete) {
+            return;
+        }
 
-    if (!this.isTestActive) {
-        this.start();
-    }
+        if (!this.isTestActive) {
+            this.start();
+        }
 
-    if (this.currentWordIndex >= this.words.length) {
-        return;
-    }
+        if (this.currentWordIndex >= this.words.length) {
+            return;
+        }
 
-    const currentWord = this.words[this.currentWordIndex];
-    this.input += char;
-    this.wordInputs[this.currentWordIndex] = this.input;
-    
-    if (this.currentCharIndex < currentWord.length) {
-        if (char === currentWord[this.currentCharIndex]) {
-            this.correctChars++;
+        const currentWord = this.words[this.currentWordIndex];
+        this.input += char;
+        this.wordInputs[this.currentWordIndex] = this.input;
+        
+        if (this.currentCharIndex < currentWord.length) {
+            if (char === currentWord[this.currentCharIndex]) {
+                this.correctChars++;
+            } else {
+                this.incorrectChars++;
+            }
         } else {
             this.incorrectChars++;
         }
-    } else {
-        this.incorrectChars++;
+        
+        this.currentCharIndex++;
+        this.render();
+        this.updateStats();
+        
+        requestAnimationFrame(() => this.updateCaret());
+        
+        // Check if we just completed the last character of the last word
+        if (this.mode === 'words' && 
+            this.currentWordIndex === this.words.length - 1 && 
+            this.currentCharIndex === currentWord.length) {
+            this.finish();
+        }
     }
-    
-    this.currentCharIndex++;
-    this.render();
-    this.updateStats();
-    
-    requestAnimationFrame(() => this.updateCaret());
-    
-    // Check if we just completed the last character of the last word
-    if (this.mode === 'words' && 
-        this.currentWordIndex === this.words.length - 1 && 
-        this.currentCharIndex === currentWord.length) {
-        this.finish();
-    }
-}
-
 
     handleSpace() {
-    if (this.isTestComplete) {
-        return;
+        if (this.isTestComplete) {
+            return;
+        }
+
+        if (!this.isTestActive) {
+            this.start();
+        }
+
+        if (this.currentWordIndex >= this.words.length - 1) {
+            return;
+        }
+
+        this.currentWordIndex++;
+        this.currentCharIndex = 0;
+        this.input = this.wordInputs[this.currentWordIndex] || '';
+        
+        this.render();
+        this.updateStats();
+        
+        requestAnimationFrame(() => this.updateCaret());
     }
-
-    if (!this.isTestActive) {
-        this.start();
-    }
-
-    if (this.currentWordIndex >= this.words.length - 1) {
-        return;
-    }
-
-    this.currentWordIndex++;
-    this.currentCharIndex = 0;
-    this.input = this.wordInputs[this.currentWordIndex] || '';
-    
-    this.render();
-    this.updateStats();
-    
-    requestAnimationFrame(() => this.updateCaret());
-}
-
-
 
     handleBackspace() {
         if (this.isTestComplete) {
@@ -197,41 +194,40 @@ class TypingEngine {
     }
 
     finish() {
-    this.isTestActive = false;
-    this.isTestComplete = true;
-    this.endTime = Date.now();
-    
-    if (this.timerInterval) {
-        clearInterval(this.timerInterval);
-        this.timerInterval = null;
+        this.isTestActive = false;
+        this.isTestComplete = true;
+        this.endTime = Date.now();
+        
+        if (this.timerInterval) {
+            clearInterval(this.timerInterval);
+            this.timerInterval = null;
+        }
+
+        if (this.wpmTrackingInterval) {
+            clearInterval(this.wpmTrackingInterval);
+            this.wpmTrackingInterval = null;
+        }
+
+        this.wpmHistory.push(this.calculateWPM());
+        this.updateStats();
+        
+        // Store results in localStorage
+        const results = {
+            wpm: this.calculateWPM(),
+            accuracy: this.calculateAccuracy(),
+            errorRate: this.calculateErrorRate(),
+            time: this.getElapsedTime(),
+            totalChars: this.correctChars + this.incorrectChars,
+            correctChars: this.correctChars,
+            incorrectChars: this.incorrectChars,
+            wpmHistory: this.wpmHistory
+        };
+        
+        localStorage.setItem('testResults', JSON.stringify(results));
+        
+        // Redirect to results page - FIXED PATH
+        window.location.href = 'public/results.html';
     }
-
-    if (this.wpmTrackingInterval) {
-        clearInterval(this.wpmTrackingInterval);
-        this.wpmTrackingInterval = null;
-    }
-
-    this.wpmHistory.push(this.calculateWPM());
-    this.updateStats();
-    
-    // Store results in localStorage
-    const results = {
-        wpm: this.calculateWPM(),
-        accuracy: this.calculateAccuracy(),
-        errorRate: this.calculateErrorRate(),
-        time: this.getElapsedTime(),
-        totalChars: this.correctChars + this.incorrectChars,
-        correctChars: this.correctChars,
-        incorrectChars: this.incorrectChars,
-        wpmHistory: this.wpmHistory
-    };
-    
-    localStorage.setItem('testResults', public/jsON.stringify(results));
-    
-    // Redirect to results page
-    window.location.href = 'results.html';
-}
-
 
     calculateWPM() {
         const timeInMinutes = this.getElapsedTime() / 60;
