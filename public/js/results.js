@@ -25,15 +25,12 @@ document.querySelectorAll('.theme-option').forEach(button => {
         e.preventDefault();
         e.stopPropagation();
         const theme = this.getAttribute('data-theme');
-        
         document.body.className = `theme-${theme} min-h-screen`;
         localStorage.setItem('theme', theme);
         currentTheme = theme;
         updateActiveTheme(theme);
-        
         themeDropdown.classList.add('hidden');
         themeDropdown.classList.remove('show');
-        
         drawGraph();
     });
 });
@@ -48,12 +45,11 @@ function updateActiveTheme(theme) {
 }
 
 // Get results from localStorage
-const results = public/jsON.parse(localStorage.getItem('testResults') || '{}');
+const results = JSON.parse(localStorage.getItem('testResults') || '{}');
 
 // Save current test to history
 function saveToHistory() {
-    let history = public/jsON.parse(localStorage.getItem('testHistory') || '[]');
-    
+    let history = JSON.parse(localStorage.getItem('testHistory') || '[]');
     const testRecord = {
         wpm: results.wpm,
         accuracy: results.accuracy,
@@ -67,15 +63,14 @@ function saveToHistory() {
         peakWpm: calculatePeakWPM(),
         timestamp: new Date().toISOString()
     };
+
+    history.unshift(testRecord);
     
-    history.unshift(testRecord); // Add to beginning
-    
-    // Keep only last 50 tests
     if (history.length > 50) {
         history = history.slice(0, 50);
     }
-    
-    localStorage.setItem('testHistory', public/jsON.stringify(history));
+
+    localStorage.setItem('testHistory', JSON.stringify(history));
 }
 
 // Calculate additional metrics
@@ -89,13 +84,11 @@ function calculateRawWPM() {
 
 function calculateConsistency() {
     if (!results.wpmHistory || results.wpmHistory.length < 2) return 100;
-    
     const avg = results.wpmHistory.reduce((a, b) => a + b, 0) / results.wpmHistory.length;
     const variance = results.wpmHistory.reduce((sum, wpm) => {
         return sum + Math.pow(wpm - avg, 2);
     }, 0) / results.wpmHistory.length;
     const stdDev = Math.sqrt(variance);
-    
     const consistency = 100 - ((stdDev / avg) * 100);
     return Math.max(0, Math.min(100, Math.round(consistency)));
 }
@@ -107,12 +100,9 @@ function calculatePeakWPM() {
 
 // Display results
 if (results.wpm !== undefined) {
-    // Primary stats
     document.getElementById('result-wpm').textContent = results.wpm;
     document.getElementById('result-accuracy').textContent = results.accuracy + '%';
     document.getElementById('result-errors').textContent = results.errorRate + '%';
-    
-    // Secondary stats (no avg wpm)
     document.getElementById('result-time').textContent = results.time + 's';
     document.getElementById('result-chars').textContent = results.totalChars;
     document.getElementById('result-correct').textContent = results.correctChars;
@@ -121,7 +111,6 @@ if (results.wpm !== undefined) {
     document.getElementById('result-consistency').textContent = calculateConsistency() + '%';
     document.getElementById('result-peak-wpm').textContent = calculatePeakWPM();
     
-    // Save to history
     saveToHistory();
 }
 
@@ -130,7 +119,6 @@ function drawGraph() {
     if (!canvas || !results.wpmHistory || results.wpmHistory.length < 2) return;
     
     const ctx = canvas.getContext('2d');
-    
     canvas.width = canvas.offsetWidth * 2;
     canvas.height = canvas.offsetHeight * 2;
     ctx.scale(2, 2);
@@ -148,7 +136,7 @@ function drawGraph() {
         .getPropertyValue('--text-primary').trim();
     
     const maxWPM = Math.max(...results.wpmHistory, 10);
-    const padding = 45;  // Increased from 40 for more space
+    const padding = 45;
     const graphWidth = width - padding * 2;
     const graphHeight = height - padding * 2;
     
@@ -198,7 +186,7 @@ function drawGraph() {
         ctx.fill();
     });
     
-    // Draw Y-axis labels (WPM values)
+    // Draw Y-axis labels
     ctx.fillStyle = textSecondary;
     ctx.font = '10px Roboto Mono';
     ctx.textAlign = 'right';
@@ -209,7 +197,7 @@ function drawGraph() {
         ctx.fillText(wpm, padding - 10, y);
     }
     
-    // Y-axis label (vertical "words per minute") - with more spacing
+    // Y-axis label
     ctx.save();
     ctx.translate(10, height / 2);
     ctx.rotate(-Math.PI / 2);
@@ -219,35 +207,24 @@ function drawGraph() {
     ctx.fillText('words per minute', 0, 0);
     ctx.restore();
     
-    // X-axis label ("time")
+    // X-axis label
     ctx.textAlign = 'right';
     ctx.fillStyle = textPrimary;
     ctx.font = '11px Roboto Mono';
     ctx.fillText('time', width - padding, height - 10);
 }
 
-
 drawGraph();
 
 // Screenshot functionality
 document.getElementById('screenshot-btn').addEventListener('click', function() {
-    const element = document.getElementById('results-content');
-    
-    html2canvas(element, {
-        backgroundColor: getComputedStyle(document.body).backgroundColor,
-        scale: 2
-    }).then(canvas => {
-        const link = document.createElement('a');
-        link.download = `tutletype-${results.wpm}wpm-${new Date().getTime()}.png`;
-        link.href = canvas.toDataURL();
-        link.click();
-    });
+    alert('Screenshot feature requires html2canvas library. Install and configure it in results.html');
 });
 
 // Compare functionality
 document.getElementById('compare-btn').addEventListener('click', function() {
     const comparisonSection = document.getElementById('comparison-section');
-    const history = public/jsON.parse(localStorage.getItem('testHistory') || '[]');
+    const history = JSON.parse(localStorage.getItem('testHistory') || '[]');
     
     if (comparisonSection.classList.contains('show')) {
         comparisonSection.classList.remove('show');
@@ -259,7 +236,6 @@ document.getElementById('compare-btn').addEventListener('click', function() {
         return;
     }
     
-    // Get last 10 tests (excluding current which is at index 0)
     const last10 = history.slice(1, 11);
     
     if (last10.length === 0) {
@@ -286,12 +262,7 @@ document.getElementById('compare-btn').addEventListener('click', function() {
     comparisonSection.classList.add('show');
 });
 
-// History functionality
-document.getElementById('history-btn').addEventListener('click', function() {
-    window.location.href = 'history.html';
-});
-
 // Try again button
 document.getElementById('try-again').addEventListener('click', function() {
-    window.location.href = 'index.html';
+    window.location.href = '../index.html';
 });

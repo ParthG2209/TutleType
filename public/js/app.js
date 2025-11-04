@@ -144,10 +144,16 @@ userInput.addEventListener('keydown', function(e) {
     }
 });
 
-// Keep focus on input - REMOVED THE PROBLEMATIC CODE
-// Only focus on input if test is active and not complete
+// Keep focus on input - FIXED VERSION
+// Only refocus if test is active and not complete, to allow navigation to work
 document.addEventListener('click', function(e) {
-    if (!e.target.closest('button') && typingEngine.isTestActive && !typingEngine.isTestComplete) {
+    // Check if clicking on a button - if yes, don't refocus
+    if (e.target.closest('button')) {
+        return;
+    }
+    
+    // Only refocus input if test is active (allows redirect to work when test finishes)
+    if (typingEngine.isTestActive && !typingEngine.isTestComplete) {
         userInput.focus();
     }
 });
