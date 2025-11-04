@@ -216,10 +216,22 @@ function drawGraph() {
 
 drawGraph();
 
-// Screenshot functionality
 document.getElementById('screenshot-btn').addEventListener('click', function() {
-    alert('Screenshot feature requires html2canvas library. Install and configure it in results.html');
+    if (typeof html2canvas === 'undefined') {
+        alert('html2canvas library not loaded yet. Try again in a moment.');
+        return;
+    }
+    
+    html2canvas(document.querySelector('.results-container') || document.body).then(canvas => {
+        const link = document.createElement('a');
+        link.href = canvas.toDataURL('image/png');
+        link.download = 'tutletype-results-' + new Date().getTime() + '.png';
+        link.click();
+    }).catch(err => {
+        alert('Failed to take screenshot: ' + err.message);
+    });
 });
+
 
 // Compare functionality
 document.getElementById('compare-btn').addEventListener('click', function() {
