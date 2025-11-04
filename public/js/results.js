@@ -262,6 +262,42 @@ document.getElementById('compare-btn').addEventListener('click', function() {
     comparisonSection.classList.add('show');
 });
 
+// History button
+document.getElementById('history-btn').addEventListener('click', function() {
+    const historySection = document.getElementById('history-section');
+    const history = JSON.parse(localStorage.getItem('testHistory') || '[]');
+    
+    if (historySection.classList.contains('show')) {
+        historySection.classList.remove('show');
+        return;
+    }
+    
+    if (history.length === 0) {
+        alert('No test history yet. Complete some tests first!');
+        return;
+    }
+    
+    // Build history list
+    const last10 = history.slice(0, 10);
+    let historyHTML = '';
+    
+    last10.forEach((test, index) => {
+        historyHTML += `
+            <div style="padding: 10px; border-bottom: 1px solid #ccc; margin-bottom: 5px;">
+                <div><strong>Test ${index + 1}</strong></div>
+                <div>WPM: <span style="color: var(--accent-color);">${test.wpm}</span> | 
+                     Accuracy: <span>${test.accuracy}%</span> | 
+                     Time: <span>${test.time}s</span></div>
+            </div>
+        `;
+    });
+    
+    document.getElementById('history-list').innerHTML = historyHTML;
+    historySection.classList.remove('hidden');
+    historySection.classList.add('show');
+});
+
+
 // Try again button
 document.getElementById('try-again').addEventListener('click', function() {
     
