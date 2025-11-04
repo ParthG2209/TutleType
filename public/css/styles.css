@@ -741,3 +741,89 @@ body {
     font-size: 14px;
     color: var(--text-secondary);
 }
+/* ===== PIHU THEME (Hazelnut & Black) ===== */
+body.theme-pihu {
+    --bg-primary: #1a1a1a;
+    --bg-secondary: #0f0f0f;
+    --text-primary: #e8dcc8;
+    --text-secondary: #9d8b6f;
+    --accent-color: #b89968;
+    --error-color: #d97770;
+    --caret-color: #b89968;
+}
+
+
+
+
+/* ===== SAKURA THEME (Cherry Blossom) ===== */
+.theme-sakura {
+    --bg-primary: #fef5f1;
+    --bg-secondary: #ffe5d9;
+    --text-primary: #2d1b14;
+    --text-secondary: #8b6f63;
+    --accent-color: #ff6b9d;
+    --border-color: #ffb3c1;
+    --caret-color: #ff6b9d;
+}
+
+.theme-sakura body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.theme-sakura button {
+    background-color: #ffe5d9;
+    color: #ff6b9d;
+    border: 2px solid #ff6b9d;
+    transition: all 0.3s ease;
+}
+
+.theme-sakura button:hover {
+    background-color: #ff6b9d;
+    color: #fef5f1;
+    box-shadow: 0 0 15px rgba(255, 107, 157, 0.4);
+}
+
+/* ===== MIDNIGHT NEON THEME (Cyberpunk) ===== */
+.theme-midnight-neon {
+    --bg-primary: #0a0e27;
+    --bg-secondary: #1a1f3a;
+    --text-primary: #e0f7ff;
+    --text-secondary: #00d9ff;
+    --accent-color: #ff006e;
+    --border-color: #00d9ff;
+    --caret-color: #ff006e;
+}
+
+.theme-midnight-neon body {
+    background-color: var(--bg-primary);
+    color: var(--text-primary);
+}
+
+.theme-midnight-neon button {
+    background-color: rgba(255, 0, 110, 0.1);
+    color: #ff006e;
+    border: 2px solid #ff006e;
+    transition: all 0.3s ease;
+    text-shadow: 0 0 10px #ff006e;
+}
+
+.theme-midnight-neon button:hover {
+    background-color: #ff006e;
+    color: #0a0e27;
+    box-shadow: 0 0 20px #ff006e, 0 0 40px #00d9ff;
+}
+
+.theme-midnight-neon #text-display {
+    text-shadow: 0 0 5px #00d9ff;
+}
+
+.theme-midnight-neon .char.correct {
+    color: #00ff88;
+    text-shadow: 0 0 5px #00ff88;
+}
+
+.theme-midnight-neon .char.incorrect {
+    color: #ff006e;
+    text-shadow: 0 0 5px #ff006e;
+}

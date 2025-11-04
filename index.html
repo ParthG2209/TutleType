@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -7,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="public/css/styles.css">
 </head>
+
 <body class="theme-serika-dark min-h-screen">
     <!-- Header -->
     <div class="header-container">
@@ -20,38 +22,62 @@
                     </div>
                 </div>
             </a>
-            
+
             <!-- Theme Selector -->
             <div style="position: relative;">
                 <button id="theme-button" class="theme-button">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
                     </svg>
                 </button>
                 <div id="theme-dropdown" class="theme-dropdown hidden">
                     <button class="theme-option active" data-theme="serika-dark">
-                        <span class="theme-preview" style="background: linear-gradient(to right, #323437, #e2b714);"></span>
+                        <span class="theme-preview"
+                            style="background: linear-gradient(to right, #323437, #e2b714);"></span>
                         Serika Dark
                     </button>
                     <button class="theme-option" data-theme="nord">
-                        <span class="theme-preview" style="background: linear-gradient(to right, #2e3440, #88c0d0);"></span>
+                        <span class="theme-preview"
+                            style="background: linear-gradient(to right, #2e3440, #88c0d0);"></span>
                         Nord
                     </button>
                     <button class="theme-option" data-theme="dracula">
-                        <span class="theme-preview" style="background: linear-gradient(to right, #282a36, #bd93f9);"></span>
+                        <span class="theme-preview"
+                            style="background: linear-gradient(to right, #282a36, #bd93f9);"></span>
                         Dracula
                     </button>
                     <button class="theme-option" data-theme="light">
-                        <span class="theme-preview" style="background: linear-gradient(to right, #f5f5f5, #4a9eff);"></span>
+                        <span class="theme-preview"
+                            style="background: linear-gradient(to right, #f5f5f5, #4a9eff);"></span>
                         Light
                     </button>
                     <button class="theme-option" data-theme="gruvbox">
-                        <span class="theme-preview" style="background: linear-gradient(to right, #282828, #b8bb26);"></span>
+                        <span class="theme-preview"
+                            style="background: linear-gradient(to right, #282828, #b8bb26);"></span>
                         Gruvbox
                     </button>
                     <button class="theme-option" data-theme="botanical">
-                        <span class="theme-preview" style="background: linear-gradient(to right, #1a2421, #9dff9a);"></span>
+                        <span class="theme-preview"
+                            style="background: linear-gradient(to right, #1a2421, #9dff9a);"></span>
                         Botanical
+                    </button>
+                    <!-- NEW THEMES -->
+                    <button class="theme-option" data-theme="pihu">
+                        <span class="theme-preview"
+                            style="background: linear-gradient(to right, #1a1a1a, #b89968);"></span>
+                        Pihu
+                    </button>
+
+                    <button class="theme-option" data-theme="sakura">
+                        <span class="theme-preview"
+                            style="background: linear-gradient(to right, #fef5f1, #ff6b9d);"></span>
+                        Sakura
+                    </button>
+                    <button class="theme-option" data-theme="midnight-neon">
+                        <span class="theme-preview"
+                            style="background: linear-gradient(to right, #0a0e27, #ff006e);"></span>
+                        Midnight Neon
                     </button>
                 </div>
             </div>
@@ -63,19 +89,22 @@
         <div class="flex gap-2 justify-center max-w-7xl mx-auto">
             <button class="tab-button active" data-tab="single">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                 </svg>
                 Single Player
             </button>
             <button class="tab-button" data-tab="multi" disabled>
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                 </svg>
                 Multiplayer
             </button>
             <button class="tab-button" data-tab="leaderboard" disabled>
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
                 Leaderboard
             </button>
@@ -98,7 +127,8 @@
             </div>
             <button class="reset-button" id="reset-button">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                 </svg>
             </button>
         </div>
@@ -138,4 +168,5 @@
     <script src="public/js/typing-engine.js"></script>
     <script src="public/js/app.js"></script>
 </body>
+
 </html>
