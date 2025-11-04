@@ -226,8 +226,8 @@ class TypingEngine {
         localStorage.setItem('testResults', JSON.stringify(results));
         
         // Redirect to results page - FIXED PATH
-        window.location.href = 'public/results.html';
-    }
+        
+window.location.replace('../results.html');    }
 
     calculateWPM() {
         const timeInMinutes = this.getElapsedTime() / 60;
