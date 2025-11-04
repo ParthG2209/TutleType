@@ -17,6 +17,11 @@ class TypingEngine {
         this.currentTime = 30;
         this.wpmHistory = [];
         this.wpmTrackingInterval = null;
+
+        // Dynamic line system
+        this.linesPerScreen = 4;
+        this.wordsPerLine = 10;
+        this.displayStartIndex = 0;
     }
 
     init(mode = 'time', value = 30) {
@@ -39,7 +44,8 @@ class TypingEngine {
         this.isTestComplete = false;
         this.currentTime = this.mode === 'time' ? this.modeValue : 0;
         this.wpmHistory = [];
-        
+        this.displayStartIndex = 0;
+
         if (this.timerInterval) {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
@@ -50,14 +56,15 @@ class TypingEngine {
             this.wpmTrackingInterval = null;
         }
 
-        const wordCount = this.mode === 'words' ? this.modeValue : 100;
+        // Generate 1000 words for timed modes, or specified amount for word mode
+        const wordCount = this.mode === 'time' ? 1000 : this.modeValue;
         this.words = generateWords(wordCount);
         this.wordInputs = new Array(this.words.length).fill('');
-        
+
         this.render();
         this.updateStats();
         this.updateCaret();
-        
+
         // Hide results if they exist
         const overlay = document.getElementById('results-overlay');
         if (overlay) {
@@ -69,7 +76,7 @@ class TypingEngine {
         if (!this.isTestActive && !this.isTestComplete) {
             this.isTestActive = true;
             this.startTime = Date.now();
-            
+
             if (this.mode === 'time') {
                 this.startTimer();
             }
@@ -86,7 +93,7 @@ class TypingEngine {
             if (this.currentTime > 0) {
                 this.currentTime--;
                 this.updateStats();
-                
+
                 if (this.currentTime <= 0) {
                     this.finish();
                 }
@@ -110,7 +117,7 @@ class TypingEngine {
         const currentWord = this.words[this.currentWordIndex];
         this.input += char;
         this.wordInputs[this.currentWordIndex] = this.input;
-        
+
         if (this.currentCharIndex < currentWord.length) {
             if (char === currentWord[this.currentCharIndex]) {
                 this.correctChars++;
@@ -120,16 +127,16 @@ class TypingEngine {
         } else {
             this.incorrectChars++;
         }
-        
+
         this.currentCharIndex++;
         this.render();
         this.updateStats();
-        
+
         requestAnimationFrame(() => this.updateCaret());
-        
-        // Check if we just completed the last character of the last word
-        if (this.mode === 'words' && 
-            this.currentWordIndex === this.words.length - 1 && 
+
+        // Check if we just completed the last character of the last word in word mode
+        if (this.mode === 'words' &&
+            this.currentWordIndex === this.words.length - 1 &&
             this.currentCharIndex === currentWord.length) {
             this.finish();
         }
@@ -151,12 +158,38 @@ class TypingEngine {
         this.currentWordIndex++;
         this.currentCharIndex = 0;
         this.input = this.wordInputs[this.currentWordIndex] || '';
-        
+
+        // Scroll logic: scroll after completing first line (10 words)
+        const currentLineIndex = Math.floor(this.currentWordIndex / this.wordsPerLine);
+        const displayLineIndex = Math.floor(this.displayStartIndex / this.wordsPerLine);
+
+        if (currentLineIndex > displayLineIndex) {
+            const textDisplay = document.getElementById('text-display');
+
+            // Add smooth animation class
+            textDisplay.classList.add('scrolling');
+
+            // Update display
+            this.displayStartIndex += this.wordsPerLine;
+
+            setTimeout(() => {
+                this.render();
+                textDisplay.classList.remove('scrolling');
+                this.updateCaret();
+            }, 300);
+
+            return;
+        }
+
         this.render();
         this.updateStats();
-        
+
         requestAnimationFrame(() => this.updateCaret());
     }
+
+
+
+
 
     handleBackspace() {
         if (this.isTestComplete) {
@@ -166,7 +199,7 @@ class TypingEngine {
         if (this.currentCharIndex > 0) {
             const currentWord = this.words[this.currentWordIndex];
             const removedChar = this.input[this.currentCharIndex - 1];
-            
+
             if (this.currentCharIndex <= currentWord.length) {
                 if (removedChar === currentWord[this.currentCharIndex - 1]) {
                     this.correctChars--;
@@ -176,20 +209,28 @@ class TypingEngine {
             } else {
                 this.incorrectChars--;
             }
-            
+
             this.input = this.input.slice(0, -1);
             this.wordInputs[this.currentWordIndex] = this.input;
             this.currentCharIndex--;
-            
+
         } else if (this.currentWordIndex > 0) {
             this.currentWordIndex--;
             this.input = this.wordInputs[this.currentWordIndex] || '';
             this.currentCharIndex = this.input.length;
+
+            // Scroll back if needed
+            const currentLineIndex = Math.floor(this.currentWordIndex / this.wordsPerLine);
+            const displayLineIndex = Math.floor(this.displayStartIndex / this.wordsPerLine);
+
+            if (currentLineIndex < displayLineIndex) {
+                this.displayStartIndex = Math.max(0, this.displayStartIndex - this.wordsPerLine);
+            }
         }
-        
+
         this.render();
         this.updateStats();
-        
+
         requestAnimationFrame(() => this.updateCaret());
     }
 
@@ -197,7 +238,7 @@ class TypingEngine {
         this.isTestActive = false;
         this.isTestComplete = true;
         this.endTime = Date.now();
-        
+
         if (this.timerInterval) {
             clearInterval(this.timerInterval);
             this.timerInterval = null;
@@ -210,7 +251,7 @@ class TypingEngine {
 
         this.wpmHistory.push(this.calculateWPM());
         this.updateStats();
-        
+
         // Store results in localStorage
         const results = {
             wpm: this.calculateWPM(),
@@ -222,12 +263,12 @@ class TypingEngine {
             incorrectChars: this.incorrectChars,
             wpmHistory: this.wpmHistory
         };
-        
+
         localStorage.setItem('testResults', JSON.stringify(results));
-        
-        // Redirect to results page - FIXED PATH
-        
-window.location.replace('../results.html');    }
+
+        // Redirect to results page
+        window.location.href = '/results.html';
+    }
 
     calculateWPM() {
         const timeInMinutes = this.getElapsedTime() / 60;
@@ -259,7 +300,7 @@ window.location.replace('../results.html');    }
     updateStats() {
         document.getElementById('wpm').textContent = this.calculateWPM();
         document.getElementById('accuracy').textContent = this.calculateAccuracy() + '%';
-        
+
         if (this.mode === 'time') {
             const displayTime = this.currentTime < 0 ? 0 : this.currentTime;
             document.getElementById('timer').textContent = displayTime;
@@ -272,27 +313,35 @@ window.location.replace('../results.html');    }
         const textDisplay = document.getElementById('text-display');
         let html = '';
 
-        this.words.forEach((word, wordIndex) => {
+        // Display start to end with proper 40 word limit
+        const displayEndIndex = Math.min(
+            this.displayStartIndex + 40,
+            this.words.length
+        );
+
+        // Add all words to display
+        for (let wordIndex = this.displayStartIndex; wordIndex < displayEndIndex; wordIndex++) {
+            const word = this.words[wordIndex];
             let wordHtml = '<span class="word';
-            
+
             if (wordIndex === this.currentWordIndex) {
                 wordHtml += ' active';
             }
-            
+
             wordHtml += '">';
-            
+
             const typedInput = this.wordInputs[wordIndex] || '';
             const maxLength = Math.max(word.length, wordIndex === this.currentWordIndex ? typedInput.length : 0);
-            
+
             for (let charIndex = 0; charIndex < maxLength; charIndex++) {
                 const char = word[charIndex];
                 let className = 'char';
                 let displayChar = char || '';
-                
-                if (wordIndex < this.currentWordIndex || 
+
+                if (wordIndex < this.currentWordIndex ||
                     (wordIndex === this.currentWordIndex && charIndex < this.currentCharIndex)) {
                     const typedChar = typedInput[charIndex];
-                    
+
                     if (charIndex < word.length) {
                         if (typedChar === char) {
                             className += ' correct';
@@ -306,18 +355,28 @@ window.location.replace('../results.html');    }
                 } else if (charIndex < word.length) {
                     displayChar = char;
                 }
-                
+
                 if (displayChar) {
                     wordHtml += `<span class="${className}">${displayChar}</span>`;
                 }
             }
-            
+
             wordHtml += '</span>';
-            html += wordHtml;
-        });
+            html += wordHtml + ' ';
+        }
+
+        // Add padding words to fill 4 complete lines
+        const numWordsShown = displayEndIndex - this.displayStartIndex;
+        const paddingNeeded = 40 - numWordsShown;
+
+        for (let i = 0; i < paddingNeeded; i++) {
+            html += '<span class="word placeholder">&nbsp;</span> ';
+        }
 
         textDisplay.innerHTML = html;
     }
+
+
 
     updateCaret() {
         let caret = document.getElementById('caret');
@@ -330,18 +389,20 @@ window.location.replace('../results.html');    }
 
         setTimeout(() => {
             const words = document.querySelectorAll('.word');
-            if (this.currentWordIndex >= words.length) {
+            const displayRelativeIndex = this.currentWordIndex - this.displayStartIndex;
+
+            if (displayRelativeIndex < 0 || displayRelativeIndex >= words.length) {
                 caret.style.opacity = '0';
                 return;
             }
-            
+
             caret.style.opacity = '1';
-            const currentWord = words[this.currentWordIndex];
+            const currentWord = words[displayRelativeIndex];
             const chars = currentWord.querySelectorAll('.char');
-            
+
             const textDisplay = document.getElementById('text-display');
             const textDisplayRect = textDisplay.getBoundingClientRect();
-            
+
             if (chars.length === 0) {
                 const wordRect = currentWord.getBoundingClientRect();
                 caret.style.left = (wordRect.left - textDisplayRect.left) + 'px';
@@ -349,21 +410,21 @@ window.location.replace('../results.html');    }
             } else if (this.currentCharIndex === 0) {
                 const firstChar = chars[0];
                 const rect = firstChar.getBoundingClientRect();
-                
+
                 caret.style.left = (rect.left - textDisplayRect.left) + 'px';
                 caret.style.top = (rect.top - textDisplayRect.top) + 'px';
-                
+
             } else if (this.currentCharIndex <= chars.length) {
                 const prevChar = chars[this.currentCharIndex - 1];
                 const rect = prevChar.getBoundingClientRect();
-                
+
                 caret.style.left = (rect.right - textDisplayRect.left) + 'px';
                 caret.style.top = (rect.top - textDisplayRect.top) + 'px';
-                
+
             } else {
                 const lastChar = chars[chars.length - 1];
                 const rect = lastChar.getBoundingClientRect();
-                
+
                 caret.style.left = (rect.right - textDisplayRect.left) + 'px';
                 caret.style.top = (rect.top - textDisplayRect.top) + 'px';
             }
@@ -373,19 +434,19 @@ window.location.replace('../results.html');    }
     showResults() {
         const overlay = document.getElementById('results-overlay');
         if (!overlay) return;
-        
+
         // Update metrics
         const wpmEl = document.getElementById('result-wpm');
         const accEl = document.getElementById('result-accuracy');
         const errEl = document.getElementById('result-errors');
-        
+
         if (wpmEl) wpmEl.textContent = this.calculateWPM();
         if (accEl) accEl.textContent = this.calculateAccuracy() + '%';
         if (errEl) errEl.textContent = this.calculateErrorRate() + '%';
-        
+
         // Draw graph
         this.drawPerformanceGraph();
-        
+
         // Show overlay
         overlay.classList.add('show');
     }
@@ -400,41 +461,41 @@ window.location.replace('../results.html');    }
     drawPerformanceGraph() {
         const canvas = document.getElementById('performance-graph');
         if (!canvas) return;
-        
+
         const ctx = canvas.getContext('2d');
-        
+
         // Set canvas size
         canvas.width = canvas.offsetWidth * 2;
         canvas.height = canvas.offsetHeight * 2;
         ctx.scale(2, 2);
-        
+
         const width = canvas.offsetWidth;
         const height = canvas.offsetHeight;
-        
+
         // Clear canvas
         ctx.clearRect(0, 0, width, height);
-        
+
         if (this.wpmHistory.length < 2) {
             return;
         }
-        
+
         // Get accent color from CSS variable
         const accentColor = getComputedStyle(document.documentElement)
             .getPropertyValue('--accent-color').trim();
         const textSecondary = getComputedStyle(document.documentElement)
             .getPropertyValue('--text-secondary').trim();
-        
+
         // Calculate scales
         const maxWPM = Math.max(...this.wpmHistory, 10);
         const padding = 30;
         const graphWidth = width - padding * 2;
         const graphHeight = height - padding * 2;
-        
+
         // Draw grid lines
         ctx.strokeStyle = textSecondary;
         ctx.globalAlpha = 0.1;
         ctx.lineWidth = 1;
-        
+
         for (let i = 0; i <= 4; i++) {
             const y = padding + (graphHeight / 4) * i;
             ctx.beginPath();
@@ -442,45 +503,45 @@ window.location.replace('../results.html');    }
             ctx.lineTo(width - padding, y);
             ctx.stroke();
         }
-        
+
         ctx.globalAlpha = 1;
-        
+
         // Draw WPM line
         ctx.strokeStyle = accentColor;
         ctx.lineWidth = 3;
         ctx.lineJoin = 'round';
         ctx.lineCap = 'round';
         ctx.beginPath();
-        
+
         this.wpmHistory.forEach((wpm, index) => {
             const x = padding + (graphWidth / (this.wpmHistory.length - 1)) * index;
             const y = padding + graphHeight - (wpm / maxWPM) * graphHeight;
-            
+
             if (index === 0) {
                 ctx.moveTo(x, y);
             } else {
                 ctx.lineTo(x, y);
             }
         });
-        
+
         ctx.stroke();
-        
+
         // Draw points
         ctx.fillStyle = accentColor;
         this.wpmHistory.forEach((wpm, index) => {
             const x = padding + (graphWidth / (this.wpmHistory.length - 1)) * index;
             const y = padding + graphHeight - (wpm / maxWPM) * graphHeight;
-            
+
             ctx.beginPath();
             ctx.arc(x, y, 4, 0, Math.PI * 2);
             ctx.fill();
         });
-        
+
         // Draw axis labels
         ctx.fillStyle = textSecondary;
         ctx.font = '10px Roboto Mono';
         ctx.textAlign = 'right';
-        
+
         for (let i = 0; i <= 4; i++) {
             const wpm = Math.round((maxWPM / 4) * (4 - i));
             const y = padding + (graphHeight / 4) * i + 3;
