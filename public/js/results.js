@@ -281,6 +281,9 @@ document.getElementById('history-btn').addEventListener('click', function() {
     
     if (historySection.classList.contains('show')) {
         historySection.classList.remove('show');
+        setTimeout(() => {
+            historySection.style.display = 'none';
+        }, 300);
         return;
     }
     
@@ -305,9 +308,15 @@ document.getElementById('history-btn').addEventListener('click', function() {
     });
     
     document.getElementById('history-list').innerHTML = historyHTML;
+    
+    // Show with animation
+    historySection.style.display = 'block';
     historySection.classList.remove('hidden');
-    historySection.classList.add('show');
+    setTimeout(() => {
+        historySection.classList.add('show');
+    }, 10);
 });
+
 
 
 // Try again button

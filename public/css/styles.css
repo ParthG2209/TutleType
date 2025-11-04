@@ -719,10 +719,16 @@ body {
     border-radius: 8px;
     margin-top: 20px;
     background-color: rgba(0, 0, 0, 0.1);
+    opacity: 0;
+    max-height: 0;
+    overflow: hidden;
+    transition: all 0.3s ease-in-out;
 }
 
 #history-section.show {
     display: block;
+    opacity: 1;
+    max-height: 500px;
 }
 
 #history-section h3 {
