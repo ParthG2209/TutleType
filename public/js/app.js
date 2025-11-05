@@ -5,6 +5,7 @@ typingEngine.init('time', 30);
 // ========== THEME MANAGEMENT ==========
 const themeButton = document.getElementById('theme-button');
 const themeDropdown = document.getElementById('theme-dropdown');
+const userInput = document.getElementById('user-input');
 let currentTheme = localStorage.getItem('theme') || 'serika-dark';
 
 document.body.className = `theme-${currentTheme} min-h-screen`;
@@ -35,6 +36,12 @@ document.querySelectorAll('.theme-option').forEach(button => {
         updateActiveTheme(theme);
         themeDropdown.classList.add('hidden');
         themeDropdown.classList.remove('show');
+        
+        // FIXED: Refocus input after theme change to prevent typing break
+        setTimeout(() => {
+            userInput.focus();
+            typingEngine.updateCaret();
+        }, 100);
     });
 });
 
@@ -77,6 +84,9 @@ function setupModeTypeButtons() {
                 typingEngine.init('words', 25);
             }
             setupModeValueButtons();
+            
+            // Refocus input after mode change
+            userInput.focus();
         });
     });
 }
@@ -93,6 +103,9 @@ function setupModeValueButtons() {
             const modeButton = document.querySelector('[data-mode-type].active');
             const mode = modeButton ? modeButton.getAttribute('data-mode') : 'time';
             typingEngine.init(mode, value);
+            
+            // Refocus input after value change
+            userInput.focus();
         });
     });
 }
@@ -108,21 +121,19 @@ document.getElementById('reset-button').addEventListener('click', function(e) {
     const mode = modeButton ? modeButton.getAttribute('data-mode') : 'time';
     const value = valueButton ? parseInt(valueButton.getAttribute('data-value')) : 30;
     typingEngine.init(mode, value);
-    document.getElementById('user-input').focus();
+    userInput.focus();
 });
 
 // ========== TYPING AREA FOCUS ==========
 document.getElementById('typing-area').addEventListener('click', function() {
-    document.getElementById('user-input').focus();
+    userInput.focus();
 });
 
 window.addEventListener('load', function() {
-    document.getElementById('user-input').focus();
+    userInput.focus();
 });
 
 // ========== KEYBOARD INPUT ==========
-const userInput = document.getElementById('user-input');
-
 userInput.addEventListener('input', function(e) {
     const value = e.target.value;
     if (value.length > 0) {
@@ -145,15 +156,21 @@ userInput.addEventListener('keydown', function(e) {
 });
 
 // Keep focus on input - FIXED VERSION
-// Only refocus if test is active and not complete, to allow navigation to work
 document.addEventListener('click', function(e) {
-    // Check if clicking on a button - if yes, don't refocus
-    if (e.target.closest('button')) {
+    // Check if clicking on a button or link - if yes, don't refocus
+    if (e.target.closest('button') || e.target.closest('a')) {
         return;
     }
     
     // Only refocus input if test is active (allows redirect to work when test finishes)
     if (typingEngine.isTestActive && !typingEngine.isTestComplete) {
         userInput.focus();
+    }
+});
+
+// Add focus listener to update caret when input is refocused
+userInput.addEventListener('focus', function() {
+    if (!typingEngine.isTestComplete) {
+        typingEngine.updateCaret();
     }
 });
