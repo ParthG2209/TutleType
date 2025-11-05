@@ -255,7 +255,7 @@ class TypingEngine {
         localStorage.setItem('testResults', JSON.stringify(results));
 
         // Redirect to results page
-        window.location.href = '/results.html';
+        window.location.href = './public/results.html';
     }
 
     calculateWPM() {

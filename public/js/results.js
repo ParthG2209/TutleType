@@ -322,5 +322,5 @@ document.getElementById('history-btn').addEventListener('click', function() {
 // Try again button
 document.getElementById('try-again').addEventListener('click', function() {
     
-window.location.href = './index.html'
+window.location.href = '../index.html'
 });
