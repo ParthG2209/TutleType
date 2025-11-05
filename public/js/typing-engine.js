@@ -177,8 +177,6 @@ class TypingEngine {
         requestAnimationFrame(() => this.updateCaret());
     }
 
-
-
     handleBackspace() {
         if (this.isTestComplete) {
             return;
@@ -364,8 +362,6 @@ class TypingEngine {
         textDisplay.innerHTML = html;
     }
 
-
-
     updateCaret() {
         let caret = document.getElementById('caret');
         if (!caret) {
@@ -394,27 +390,27 @@ class TypingEngine {
             if (chars.length === 0) {
                 const wordRect = currentWord.getBoundingClientRect();
                 caret.style.left = (wordRect.left - textDisplayRect.left) + 'px';
-                caret.style.top = (wordRect.top - textDisplayRect.top) + 'px';
+                caret.style.top = (wordRect.top - textDisplayRect.top + 2) + 'px';
             } else if (this.currentCharIndex === 0) {
                 const firstChar = chars[0];
                 const rect = firstChar.getBoundingClientRect();
 
                 caret.style.left = (rect.left - textDisplayRect.left) + 'px';
-                caret.style.top = (rect.top - textDisplayRect.top) + 'px';
+                caret.style.top = (rect.top - textDisplayRect.top + 2) + 'px';
 
             } else if (this.currentCharIndex <= chars.length) {
                 const prevChar = chars[this.currentCharIndex - 1];
                 const rect = prevChar.getBoundingClientRect();
 
                 caret.style.left = (rect.right - textDisplayRect.left) + 'px';
-                caret.style.top = (rect.top - textDisplayRect.top) + 'px';
+                caret.style.top = (rect.top - textDisplayRect.top + 2) + 'px';
 
             } else {
                 const lastChar = chars[chars.length - 1];
                 const rect = lastChar.getBoundingClientRect();
 
                 caret.style.left = (rect.right - textDisplayRect.left) + 'px';
-                caret.style.top = (rect.top - textDisplayRect.top) + 'px';
+                caret.style.top = (rect.top - textDisplayRect.top + 2) + 'px';
             }
         }, 0);
     }
