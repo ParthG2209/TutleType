@@ -164,20 +164,10 @@ class TypingEngine {
         const displayLineIndex = Math.floor(this.displayStartIndex / this.wordsPerLine);
 
         if (currentLineIndex > displayLineIndex) {
-            const textDisplay = document.getElementById('text-display');
-
-            // Add smooth animation class
-            textDisplay.classList.add('scrolling');
-
-            // Update display
+            // Just update the display instantly - no animation
             this.displayStartIndex += this.wordsPerLine;
-
-            setTimeout(() => {
-                this.render();
-                textDisplay.classList.remove('scrolling');
-                this.updateCaret();
-            }, 300);
-
+            this.render();
+            this.updateCaret();
             return;
         }
 
@@ -186,8 +176,6 @@ class TypingEngine {
 
         requestAnimationFrame(() => this.updateCaret());
     }
-
-
 
 
 

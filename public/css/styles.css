@@ -827,14 +827,3 @@ body.theme-pihu {
     color: #ff006e;
     text-shadow: 0 0 5px #ff006e;
 }
-/* smooth line scroll  */
-#text-display {
-    transition: opacity 0.3s ease-out, filter 0.3s ease-out;
-    will-change: opacity, filter;
-}
-
-#text-display.scrolling {
-    opacity: 0.5;
-    filter: blur(0.5px);
-}
-
