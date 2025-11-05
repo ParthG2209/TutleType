@@ -23,62 +23,70 @@
                 </div>
             </a>
 
-            <!-- Theme Selector -->
-            <div style="position: relative;">
-                <button id="theme-button" class="theme-button">
-                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                            d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            <div class="flex items-center gap-3">
+                <!-- Login Button -->
+                <a href="public/login.html" class="mode-button" style="text-decoration: none;">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                </button>
-                <div id="theme-dropdown" class="theme-dropdown hidden">
-                    <button class="theme-option active" data-theme="serika-dark">
-                        <span class="theme-preview"
-                            style="background: linear-gradient(to right, #323437, #e2b714);"></span>
-                        Serika Dark
-                    </button>
-                    <button class="theme-option" data-theme="nord">
-                        <span class="theme-preview"
-                            style="background: linear-gradient(to right, #2e3440, #88c0d0);"></span>
-                        Nord
-                    </button>
-                    <button class="theme-option" data-theme="dracula">
-                        <span class="theme-preview"
-                            style="background: linear-gradient(to right, #282a36, #bd93f9);"></span>
-                        Dracula
-                    </button>
-                    <button class="theme-option" data-theme="light">
-                        <span class="theme-preview"
-                            style="background: linear-gradient(to right, #f5f5f5, #4a9eff);"></span>
-                        Light
-                    </button>
-                    <button class="theme-option" data-theme="gruvbox">
-                        <span class="theme-preview"
-                            style="background: linear-gradient(to right, #282828, #b8bb26);"></span>
-                        Gruvbox
-                    </button>
-                    <button class="theme-option" data-theme="botanical">
-                        <span class="theme-preview"
-                            style="background: linear-gradient(to right, #1a2421, #9dff9a);"></span>
-                        Botanical
-                    </button>
-                    <!-- NEW THEMES -->
-                    <button class="theme-option" data-theme="pihu">
-                        <span class="theme-preview"
-                            style="background: linear-gradient(to right, #1a1a1a, #b89968);"></span>
-                        Pihu
-                    </button>
+                    login
+                </a>
 
-                    <button class="theme-option" data-theme="sakura">
-                        <span class="theme-preview"
-                            style="background: linear-gradient(to right, #fef5f1, #ff6b9d);"></span>
-                        Sakura
+                <!-- Theme Selector -->
+                <div style="position: relative;">
+                    <button id="theme-button" class="theme-button">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        </svg>
                     </button>
-                    <button class="theme-option" data-theme="midnight-neon">
-                        <span class="theme-preview"
-                            style="background: linear-gradient(to right, #0a0e27, #ff006e);"></span>
-                        Midnight Neon
-                    </button>
+                    <div id="theme-dropdown" class="theme-dropdown hidden">
+                        <button class="theme-option active" data-theme="serika-dark">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #323437, #e2b714);"></span>
+                            Serika Dark
+                        </button>
+                        <button class="theme-option" data-theme="nord">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #2e3440, #88c0d0);"></span>
+                            Nord
+                        </button>
+                        <button class="theme-option" data-theme="dracula">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #282a36, #bd93f9);"></span>
+                            Dracula
+                        </button>
+                        <button class="theme-option" data-theme="light">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #f5f5f5, #4a9eff);"></span>
+                            Light
+                        </button>
+                        <button class="theme-option" data-theme="gruvbox">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #282828, #b8bb26);"></span>
+                            Gruvbox
+                        </button>
+                        <button class="theme-option" data-theme="botanical">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #1a2421, #9dff9a);"></span>
+                            Botanical
+                        </button>
+                        <button class="theme-option" data-theme="pihu">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #1a1a1a, #b89968);"></span>
+                            Pihu
+                        </button>
+                        <button class="theme-option" data-theme="sakura">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #fef5f1, #ff6b9d);"></span>
+                            Sakura
+                        </button>
+                        <button class="theme-option" data-theme="midnight-neon">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #0a0e27, #ff006e);"></span>
+                            Midnight Neon
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
