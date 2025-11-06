@@ -7,6 +7,8 @@
     <title>TutleType</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="public/css/styles.css">
+    <!-- PeerJS Library (FREE) -->
+    <script src="https://cdn.jsdelivr.net/npm/peerjs@1.4.7/dist/peerjs.min.js"></script>
 </head>
 
 <body class="theme-serika-dark min-h-screen">
@@ -26,8 +28,10 @@
             <div class="flex items-center gap-3">
                 <!-- Login Button -->
                 <a href="public/login.html" class="mode-button" style="text-decoration: none;">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="display: inline-block; vertical-align: middle; margin-right: 4px;">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
                     login
                 </a>
@@ -102,7 +106,7 @@
                 </svg>
                 Single Player
             </button>
-            <button class="tab-button" data-tab="multi" disabled>
+            <button class="tab-button" data-tab="multi" id="multiplayer-btn">
                 <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                         d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
@@ -171,10 +175,121 @@
         </div>
     </div>
 
+    <!-- Multiplayer Modal -->
+    <div id="multiplayer-modal" class="hidden">
+        <div class="modal-content">
+            <h2>Multiplayer</h2>
+
+            <!-- Room Selection -->
+            <div id="room-selection" class="room-section">
+                <div class="section-title">Create or Join</div>
+
+                <button id="create-room-btn" class="action-btn">Create Room</button>
+
+                <div class="join-section">
+                    <input type="text" id="room-id-input" placeholder="Enter Room ID to join...">
+                    <button id="join-room-btn" class="action-btn">Join</button>
+                </div>
+
+                <div id="copy-section" class="hidden">
+                    <p>Room ID: <span id="room-id-display"></span></p>
+                    <button id="copy-btn" class="copy-btn">Copy ID</button>
+                </div>
+            </div>
+
+            <!-- Waiting for Players -->
+            <div id="waiting-section" class="hidden">
+                <p>Waiting for opponent...</p>
+                <div class="players-info">
+                    <div class="player-card">
+                        <div class="player-label">You</div>
+                        <div class="player-status ready">Ready</div>
+                    </div>
+                    <div id="opponent-card" class="player-card hidden">
+                        <div class="player-label">Opponent</div>
+                        <div class="player-status">Connecting...</div>
+                    </div>
+                </div>
+                <button id="cancel-waiting-btn" class="action-btn secondary">Cancel</button>
+            </div>
+
+            <!-- Active Game -->
+            <div id="game-active-section" class="hidden">
+                <div class="multiplayer-stats">
+                    <div class="player-stats">
+                        <div class="player-name">You</div>
+                        <div class="stat-display">
+                            <span class="stat-label">WPM</span>
+                            <span id="your-wpm" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-display">
+                            <span class="stat-label">Accuracy</span>
+                            <span id="your-accuracy" class="stat-value">100%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="your-progress" class="progress-fill"></div>
+                        </div>
+                    </div>
+
+                    <div class="player-stats">
+                        <div class="player-name">Opponent</div>
+                        <div class="stat-display">
+                            <span class="stat-label">WPM</span>
+                            <span id="opponent-wpm" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-display">
+                            <span class="stat-label">Accuracy</span>
+                            <span id="opponent-accuracy" class="stat-value">100%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div id="opponent-progress" class="progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results -->
+            <div id="multiplayer-results-section" class="hidden">
+                <div class="results-header" id="results-header"></div>
+                <div class="multiplayer-results">
+                    <div class="result-card">
+                        <div class="result-name">You</div>
+                        <div class="result-stat">
+                            <span>WPM</span>
+                            <span id="final-your-wpm" class="result-value">0</span>
+                        </div>
+                        <div class="result-stat">
+                            <span>Accuracy</span>
+                            <span id="final-your-accuracy" class="result-value">100%</span>
+                        </div>
+                    </div>
+
+                    <div class="result-card">
+                        <div class="result-name">Opponent</div>
+                        <div class="result-stat">
+                            <span>WPM</span>
+                            <span id="final-opponent-wpm" class="result-value">0</span>
+                        </div>
+                        <div class="result-stat">
+                            <span>Accuracy</span>
+                            <span id="final-opponent-accuracy" class="result-value">100%</span>
+                        </div>
+                    </div>
+                </div>
+                <button id="play-again-btn" class="action-btn">Play Again</button>
+                <button id="exit-multiplayer-btn" class="action-btn secondary">Exit</button>
+            </div>
+
+            <button id="close-multiplayer-btn" class="close-btn">✕</button>
+        </div>
+    </div>
+
     <!-- Scripts -->
     <script src="public/js/words.js"></script>
     <script src="public/js/typing-engine.js"></script>
     <script src="public/js/app.js"></script>
+    <script src="./public/js/multiplayer-engine.js"></script>
+
 </body>
 
 </html>
