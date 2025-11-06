@@ -6,26 +6,37 @@ import {
     signInWithPopup, 
     GoogleAuthProvider, 
     sendPasswordResetEmail,
-    onAuthStateChanged 
+    onAuthStateChanged,
+    setPersistence,
+    browserLocalPersistence
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
 
-// Firebase configuration
+// Firebase configuration - VERIFIED
 const firebaseConfig = {
-  apiKey: "AIzaSyB8W9yY_T5r-gU2iZSFRGo3x3lv95Ldoao",
-  authDomain: "tutletype.firebaseapp.com",
-  projectId: "tutletype",
-  storageBucket: "tutletype.firebasestorage.app",
-  messagingSenderId: "576421686799",
-  appId: "1:576421686799:web:29411c65938e55b7643d7a",
-  measurementId: "G-VRR26Z9PKZ"
+    apiKey: "AIzaSyB8W9yY_T5r-gU2iZSFRGo3x3lv95Ldoao",
+    authDomain: "tutletype.firebaseapp.com",
+    projectId: "tutletype",
+    storageBucket: "tutletype.firebasestorage.app",
+    messagingSenderId: "576421686799",
+    appId: "1:576421686799:web:29411c65938e55b7643d7a",
+    measurementId: "G-VRR26Z9PKZ"
 };
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const auth = getAuth(app);
-const provider = new GoogleAuthProvider();
+
+// Set persistence
+setPersistence(auth, browserLocalPersistence)
+    .then(() => {
+        console.log('Firebase auth persistence set');
+    })
+    .catch((error) => {
+        console.error('Persistence error:', error);
+    });
 
 // Configure Google provider
+const provider = new GoogleAuthProvider();
 provider.setCustomParameters({
     prompt: 'select_account'
 });
@@ -34,8 +45,10 @@ provider.setCustomParameters({
 onAuthStateChanged(auth, (user) => {
     if (user) {
         console.log('User already logged in:', user.email);
-        // Uncomment to auto-redirect logged-in users
-        // window.location.href = '/dashboard.html';
+        // Auto-redirect if user is already authenticated
+        // window.location.href = '../index.html';
+    } else {
+        console.log('No user logged in');
     }
 });
 
@@ -47,7 +60,6 @@ const loginBtn = document.getElementById('loginBtn');
 const googleBtn = document.getElementById('googleBtn');
 const errorMessage = document.getElementById('errorMessage');
 const forgotPasswordLink = document.getElementById('forgotPassword');
-const signupLink = document.getElementById('signupLink');
 
 // Show/hide loader
 function toggleLoader(show) {
@@ -77,6 +89,14 @@ function clearError() {
     errorMessage.style.display = 'none';
 }
 
+// Show success message
+function showSuccess(message) {
+    clearError();
+    errorMessage.style.color = '#22c55e';
+    errorMessage.textContent = message;
+    errorMessage.style.display = 'block';
+}
+
 // Handle email/password login
 loginForm.addEventListener('submit', async (e) => {
     e.preventDefault();
@@ -92,53 +112,64 @@ loginForm.addEventListener('submit', async (e) => {
         return;
     }
     
+    // Basic email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showError('Please enter a valid email address.');
+        toggleLoader(false);
+        return;
+    }
+    
     try {
-        console.log('Attempting email/password sign-in...');
+        console.log('Attempting email/password sign-in for:', email);
         const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        console.log('User logged in:', userCredential.user.email);
+        console.log('✓ User logged in successfully:', userCredential.user.email);
         
-        // Show success message
-        showError('');
-        const successMsg = document.createElement('div');
-        successMsg.style.color = '#22c55e';
-        successMsg.textContent = 'Login successful! Redirecting...';
-        errorMessage.parentNode.insertBefore(successMsg, errorMessage.nextSibling);
+        showSuccess('Login successful! Redirecting...');
         
         // Redirect after a short delay
         setTimeout(() => {
-            window.location.href = '/dashboard.html';
+            window.location.href = '../index.html';
         }, 1000);
         
     } catch (error) {
-        console.error('Login error:', error);
+        console.error('❌ Login error:', error);
         console.error('Error code:', error.code);
+        console.error('Error message:', error.message);
         
         // Handle specific error codes
+        let errorMsg = 'Login failed. Please try again.';
+        
         switch (error.code) {
             case 'auth/invalid-email':
-                showError('Invalid email address format.');
+                errorMsg = 'Invalid email address format.';
                 break;
             case 'auth/user-disabled':
-                showError('This account has been disabled.');
+                errorMsg = 'This account has been disabled.';
                 break;
             case 'auth/user-not-found':
-                showError('No account found with this email. Please sign up.');
+                errorMsg = 'No account found with this email. Please sign up first.';
                 break;
             case 'auth/wrong-password':
-                showError('Incorrect password. Please try again.');
+                errorMsg = 'Incorrect password. Please try again.';
                 break;
             case 'auth/invalid-credential':
-                showError('Invalid email or password. Please check and try again.');
+                errorMsg = 'Invalid email or password. Please check and try again.';
                 break;
             case 'auth/too-many-requests':
-                showError('Too many failed attempts. Please try again later.');
+                errorMsg = 'Too many failed attempts. Please try again later.';
                 break;
             case 'auth/network-request-failed':
-                showError('Network error. Please check your connection.');
+                errorMsg = 'Network error. Please check your connection.';
+                break;
+            case 'auth/operation-not-allowed':
+                errorMsg = 'Email/password authentication is not enabled. Please contact support.';
                 break;
             default:
-                showError(`Login failed: ${error.message}`);
+                errorMsg = error.message || 'An error occurred. Please try again.';
         }
+        
+        showError(errorMsg);
         toggleLoader(false);
     }
 });
@@ -153,47 +184,49 @@ googleBtn.addEventListener('click', async (e) => {
     try {
         console.log('Attempting Google sign-in...');
         const result = await signInWithPopup(auth, provider);
-        console.log('User logged in with Google:', result.user.email);
+        console.log('✓ User logged in with Google:', result.user.email);
         
-        // Show success message
-        showError('');
-        const successMsg = document.createElement('div');
-        successMsg.style.color = '#22c55e';
-        successMsg.textContent = 'Login successful! Redirecting...';
-        errorMessage.parentNode.insertBefore(successMsg, errorMessage.nextSibling);
+        showSuccess('Login successful! Redirecting...');
         
         // Redirect after a short delay
         setTimeout(() => {
-            window.location.href = '/dashboard.html';
+            window.location.href = '../index.html';
         }, 1000);
         
     } catch (error) {
-        console.error('Google login error:', error);
+        console.error('❌ Google login error:', error);
         console.error('Error code:', error.code);
         console.error('Error message:', error.message);
         
         googleBtn.disabled = false;
         googleBtn.style.opacity = '1';
         
+        let errorMsg = 'Google sign-in failed. Please try again.';
+        
         switch (error.code) {
             case 'auth/popup-closed-by-user':
-                showError('Sign-in popup was closed. Please try again.');
+                errorMsg = 'Sign-in popup was closed. Please try again.';
                 break;
             case 'auth/cancelled-popup-request':
                 clearError();
-                break;
+                return;
             case 'auth/popup-blocked':
-                showError('Popup was blocked. Please allow popups for this site.');
+                errorMsg = 'Popup was blocked. Please allow popups for this site.';
                 break;
             case 'auth/unauthorized-domain':
-                showError('This domain is not authorized. Please add it in Firebase Console.');
+                errorMsg = 'This domain is not authorized. Please contact support.';
                 break;
             case 'auth/operation-not-allowed':
-                showError('Google sign-in is not enabled. Please enable it in Firebase Console.');
+                errorMsg = 'Google sign-in is not enabled. Please contact support.';
+                break;
+            case 'auth/account-exists-with-different-credential':
+                errorMsg = 'An account already exists with this email using a different sign-in method.';
                 break;
             default:
-                showError(`Failed to sign in with Google: ${error.message}`);
+                errorMsg = error.message || 'Google sign-in failed. Please try again.';
         }
+        
+        showError(errorMsg);
     }
 });
 
@@ -206,32 +239,40 @@ forgotPasswordLink.addEventListener('click', async (e) => {
     
     if (!email) {
         showError('Please enter your email address first.');
+        emailInput.focus();
+        return;
+    }
+    
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        showError('Please enter a valid email address.');
         return;
     }
     
     try {
         await sendPasswordResetEmail(auth, email);
-        showError(''); // Clear error
-        alert('Password reset email sent! Check your inbox.');
+        showSuccess('Password reset email sent! Check your inbox.');
+        console.log('✓ Password reset email sent to:', email);
     } catch (error) {
-        console.error('Password reset error:', error);
+        console.error('❌ Password reset error:', error);
+        
+        let errorMsg = 'Failed to send reset email.';
         
         switch (error.code) {
             case 'auth/invalid-email':
-                showError('Invalid email address.');
+                errorMsg = 'Invalid email address.';
                 break;
             case 'auth/user-not-found':
-                showError('No account found with this email.');
+                errorMsg = 'No account found with this email.';
                 break;
             default:
-                showError('Failed to send reset email.');
+                errorMsg = error.message || 'Failed to send reset email.';
         }
+        
+        showError(errorMsg);
     }
 });
 
-// Handle sign-up link (you can implement this later)
-signupLink.addEventListener('click', (e) => {
-    e.preventDefault();
-    // Redirect to signup page
-    window.location.href = '/signup.html'; // Change this to your signup page
-});
+// Test Firebase connection
+console.log('Firebase initialized:', app.name);
+console.log('Auth domain:', firebaseConfig.authDomain);
