@@ -2,57 +2,15 @@
 let typingEngine = new TypingEngine();
 typingEngine.init('time', 30);
 
-// ========== THEME MANAGEMENT ==========
-const themeButton = document.getElementById('theme-button');
-const themeDropdown = document.getElementById('theme-dropdown');
 const userInput = document.getElementById('user-input');
-let currentTheme = localStorage.getItem('theme') || 'serika-dark';
 
-document.body.className = `theme-${currentTheme} min-h-screen`;
-updateActiveTheme(currentTheme);
-
-themeButton.addEventListener('click', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    themeDropdown.classList.toggle('hidden');
-    themeDropdown.classList.toggle('show');
-});
-
-document.addEventListener('click', function(e) {
-    if (!e.target.closest('#theme-button') && !e.target.closest('#theme-dropdown')) {
-        themeDropdown.classList.add('hidden');
-        themeDropdown.classList.remove('show');
+// ========== THEME MANAGEMENT (Using centralized theme manager) ==========
+// Initialize theme selector using the global theme manager
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.themeManager) {
+        window.themeManager.initializeThemeSelector();
     }
 });
-
-document.querySelectorAll('.theme-option').forEach(button => {
-    button.addEventListener('click', function(e) {
-        e.preventDefault();
-        e.stopPropagation();
-        const theme = this.getAttribute('data-theme');
-        document.body.className = `theme-${theme} min-h-screen`;
-        localStorage.setItem('theme', theme);
-        currentTheme = theme;
-        updateActiveTheme(theme);
-        themeDropdown.classList.add('hidden');
-        themeDropdown.classList.remove('show');
-        
-        // FIXED: Refocus input after theme change to prevent typing break
-        setTimeout(() => {
-            userInput.focus();
-            typingEngine.updateCaret();
-        }, 100);
-    });
-});
-
-function updateActiveTheme(theme) {
-    document.querySelectorAll('.theme-option').forEach(btn => {
-        btn.classList.remove('active');
-        if (btn.getAttribute('data-theme') === theme) {
-            btn.classList.add('active');
-        }
-    });
-}
 
 // ========== MODE TYPE BUTTONS ==========
 function setupModeTypeButtons() {
