@@ -175,75 +175,242 @@
         </div>
     </div>
 
-   <!-- MULTIPLAYER MODAL - WORKING VERSION -->
-<div id="multiplayer-modal" class="hidden" style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: rgba(0,0,0,0.9) !important; z-index: 9999 !important; display: none !important; align-items: center !important; justify-content: center !important; font-family: 'Roboto Mono', monospace !important;">
-  <div style="background: #323437 !important; border: 3px solid #e2b714 !important; border-radius: 8px !important; padding: 40px !important; width: 85% !important; max-width: 500px !important; color: #d1d0c5 !important; position: relative !important; box-shadow: 0 0 40px rgba(0,0,0,0.95) !important; max-height: 80vh !important; overflow-y: auto !important;">
-    
-    <h2 style="margin: 0 0 30px 0 !important; color: #e2b714 !important; text-align: center !important; font-size: 32px !important; font-weight: 600 !important; letter-spacing: 2px !important;">Multiplayer</h2>
-    
-    <!-- Room Selection Section -->
-    <div id="room-selection" style="margin-bottom: 30px !important; display: block !important;">
-      <div style="font-size: 11px !important; color: #b8bb26 !important; text-transform: uppercase !important; letter-spacing: 3px !important; margin-bottom: 20px !important; font-weight: 700 !important;">Create or Join</div>
-      
-      <button id="create-room-btn" style="background: #e2b714 !important; color: #323437 !important; border: none !important; padding: 14px 24px !important; border-radius: 4px !important; font-family: 'Roboto Mono', monospace !important; font-weight: 600 !important; cursor: pointer !important; width: 100% !important; margin-bottom: 16px !important; font-size: 14px !important; transition: all 0.2s !important; display: block !important;">Create Room</button>
-      
-      <div style="display: flex !important; gap: 10px !important; margin-bottom: 16px !important;">
-        <input type="text" id="room-id-input" placeholder="Enter Room ID..." style="flex: 1 !important; background: #2c2e31 !important; border: 1px solid #646669 !important; color: #d1d0c5 !important; padding: 12px !important; border-radius: 4px !important; font-family: 'Roboto Mono', monospace !important; font-size: 13px !important; display: block !important;">
-        <button id="join-room-btn" style="background: #e2b714 !important; color: #323437 !important; border: none !important; padding: 12px 20px !important; border-radius: 4px !important; font-family: 'Roboto Mono', monospace !important; font-weight: 600 !important; cursor: pointer !important; font-size: 13px !important; display: block !important;">Join</button>
-      </div>
-    </div>
-    
-    <!-- Copy Section -->
-    <div id="copy-section" style="background: #2c2e31 !important; padding: 20px !important; border-radius: 6px !important; border: 2px solid #646669 !important; display: none !important; margin-bottom: 20px !important;">
-      <p style="margin: 0 0 12px 0 !important; font-size: 11px !important; color: #888888 !important; text-transform: uppercase !important; letter-spacing: 1px !important; font-weight: 600 !important;">Your Room ID:</p>
-      <p style="margin: 0 0 20px 0 !important; font-size: 24px !important; color: #e2b714 !important; font-weight: bold !important; word-break: break-all !important; text-align: center !important; letter-spacing: 1px !important; display: block !important;"><span id="room-id-display">ROOM00000</span></p>
-      <button id="copy-btn" style="background: #e2b714 !important; color: #323437 !important; border: none !important; padding: 12px 24px !important; border-radius: 4px !important; font-family: 'Roboto Mono', monospace !important; font-weight: 600 !important; cursor: pointer !important; width: 100% !important; font-size: 14px !important; display: block !important;">📋 Copy ID</button>
-    </div>
-    
-    <!-- Waiting Section -->
-    <div id="waiting-section" style="text-align: center !important; display: none !important; padding: 20px 0 !important;">
-      <p style="margin: 0 0 20px 0 !important; color: #888888 !important; font-size: 14px !important; display: block !important;">⏳ Waiting for opponent to join...</p>
-      <button id="cancel-waiting-btn" style="background: #2c2e31 !important; color: #e2b714 !important; border: 2px solid #e2b714 !important; padding: 12px 24px !important; border-radius: 4px !important; font-family: 'Roboto Mono', monospace !important; font-weight: 600 !important; cursor: pointer !important; width: 100% !important; font-size: 14px !important; transition: all 0.2s !important; display: block !important;">Cancel</button>
-    </div>
-    
-    <!-- Close Button (X) -->
-    <button id="close-multiplayer-btn" type="button" style="position: absolute !important; top: 16px !important; right: 16px !important; background: none !important; border: none !important; color: #e2b714 !important; font-size: 32px !important; cursor: pointer !important; padding: 0 !important; width: 40px !important; height: 40px !important; display: flex !important; align-items: center !important; justify-content: center !important; border-radius: 4px !important; transition: all 0.2s !important; z-index: 10001 !important; line-height: 1 !important;">✕</button>
-  </div>
-</div>
+    <!-- MULTIPLAYER MODAL - WORKING VERSION -->
+    <div id="multiplayer-modal" class="hidden"
+        style="position: fixed !important; top: 0 !important; left: 0 !important; width: 100% !important; height: 100% !important; background: rgba(0,0,0,0.9) !important; z-index: 9999 !important; display: none !important; align-items: center !important; justify-content: center !important; font-family: 'Roboto Mono', monospace !important;">
+        <div
+            style="background: #323437 !important; border: 3px solid #e2b714 !important; border-radius: 8px !important; padding: 40px !important; width: 85% !important; max-width: 500px !important; color: #d1d0c5 !important; position: relative !important; box-shadow: 0 0 40px rgba(0,0,0,0.95) !important; max-height: 80vh !important; overflow-y: auto !important;">
 
-<style>
-  #multiplayer-modal.hidden {
-    display: none !important;
-  }
-  
-  #multiplayer-modal:not(.hidden) {
-    display: flex !important;
-  }
-</style>
+            <h2
+                style="margin: 0 0 30px 0 !important; color: #e2b714 !important; text-align: center !important; font-size: 32px !important; font-weight: 600 !important; letter-spacing: 2px !important;">
+                Multiplayer</h2>
+
+            <!-- Room Selection Section -->
+            <div id="room-selection" style="margin-bottom: 30px !important; display: block !important;">
+                <div
+                    style="font-size: 11px !important; color: #b8bb26 !important; text-transform: uppercase !important; letter-spacing: 3px !important; margin-bottom: 20px !important; font-weight: 700 !important;">
+                    Create or Join</div>
+
+                <button id="create-room-btn"
+                    style="background: #e2b714 !important; color: #323437 !important; border: none !important; padding: 14px 24px !important; border-radius: 4px !important; font-family: 'Roboto Mono', monospace !important; font-weight: 600 !important; cursor: pointer !important; width: 100% !important; margin-bottom: 16px !important; font-size: 14px !important; transition: all 0.2s !important; display: block !important;">Create
+                    Room</button>
+
+                <div style="display: flex !important; gap: 10px !important; margin-bottom: 16px !important;">
+                    <input type="text" id="room-id-input" placeholder="Enter Room ID..."
+                        style="flex: 1 !important; background: #2c2e31 !important; border: 1px solid #646669 !important; color: #d1d0c5 !important; padding: 12px !important; border-radius: 4px !important; font-family: 'Roboto Mono', monospace !important; font-size: 13px !important; display: block !important;">
+                    <button id="join-room-btn"
+                        style="background: #e2b714 !important; color: #323437 !important; border: none !important; padding: 12px 20px !important; border-radius: 4px !important; font-family: 'Roboto Mono', monospace !important; font-weight: 600 !important; cursor: pointer !important; font-size: 13px !important; display: block !important;">Join</button>
+                </div>
+            </div>
+
+            <!-- Copy Section -->
+            <div id="copy-section"
+                style="background: #2c2e31 !important; padding: 20px !important; border-radius: 6px !important; border: 2px solid #646669 !important; display: none !important; margin-bottom: 20px !important;">
+                <p
+                    style="margin: 0 0 12px 0 !important; font-size: 11px !important; color: #888888 !important; text-transform: uppercase !important; letter-spacing: 1px !important; font-weight: 600 !important;">
+                    Your Room ID:</p>
+                <p
+                    style="margin: 0 0 20px 0 !important; font-size: 24px !important; color: #e2b714 !important; font-weight: bold !important; word-break: break-all !important; text-align: center !important; letter-spacing: 1px !important; display: block !important;">
+                    <span id="room-id-display">ROOM00000</span></p>
+                <button id="copy-btn"
+                    style="background: #e2b714 !important; color: #323437 !important; border: none !important; padding: 12px 24px !important; border-radius: 4px !important; font-family: 'Roboto Mono', monospace !important; font-weight: 600 !important; cursor: pointer !important; width: 100% !important; font-size: 14px !important; display: block !important;">📋
+                    Copy ID</button>
+            </div>
+
+            <!-- Waiting Section -->
+            <div id="waiting-section"
+                style="text-align: center !important; display: none !important; padding: 20px 0 !important;">
+                <p
+                    style="margin: 0 0 20px 0 !important; color: #888888 !important; font-size: 14px !important; display: block !important;">
+                    ⏳ Waiting for opponent to join...</p>
+                <button id="cancel-waiting-btn"
+                    style="background: #2c2e31 !important; color: #e2b714 !important; border: 2px solid #e2b714 !important; padding: 12px 24px !important; border-radius: 4px !important; font-family: 'Roboto Mono', monospace !important; font-weight: 600 !important; cursor: pointer !important; width: 100% !important; font-size: 14px !important; transition: all 0.2s !important; display: block !important;">Cancel</button>
+            </div>
+
+            <!-- Close Button (X) -->
+            <button id="close-multiplayer-btn" type="button"
+                style="position: absolute !important; top: 16px !important; right: 16px !important; background: none !important; border: none !important; color: #e2b714 !important; font-size: 32px !important; cursor: pointer !important; padding: 0 !important; width: 40px !important; height: 40px !important; display: flex !important; align-items: center !important; justify-content: center !important; border-radius: 4px !important; transition: all 0.2s !important; z-index: 10001 !important; line-height: 1 !important;">✕</button>
+        </div>
+    </div>
+
+    <style>
+        #multiplayer-modal.hidden {
+            display: none !important;
+        }
+
+        #multiplayer-modal:not(.hidden) {
+            display: flex !important;
+        }
+    </style>
 
     <!-- Scripts -->
     <script src="public/js/words.js"></script>
     <script src="public/js/typing-engine.js"></script>
     <script src="public/js/app.js"></script>
-    <script src="./public/js/multiplayer-engine.js"></script>
+
+    <!-- MULTIPLAYER ENGINE - INLINE -->
+    <script>
+        class MultiplayerEngine {
+            constructor() {
+                this.roomId = null;
+            }
+
+            createRoom() {
+                this.roomId = 'ROOM' + Math.floor(Math.random() * 100000).toString().padStart(5, '0');
+                console.log('✓ Room created:', this.roomId);
+                return this.roomId;
+            }
+
+            joinRoom(roomId) {
+                this.roomId = roomId;
+                console.log('✓ Joined room:', this.roomId);
+                return this.roomId;
+            }
+        }
+
+        const multiplayerEngine = new MultiplayerEngine();
+        window.multiplayerEngine = multiplayerEngine;
+
+        document.addEventListener('DOMContentLoaded', function () {
+            console.log('✓ MULTIPLAYER LOADED');
+
+            const createBtn = document.getElementById('create-room-btn');
+            const joinBtn = document.getElementById('join-room-btn');
+            const cancelBtn = document.getElementById('cancel-waiting-btn');
+            const closeBtn = document.getElementById('close-multiplayer-btn');
+            const modal = document.getElementById('multiplayer-modal');
+            const roomDisplay = document.getElementById('room-id-display');
+            const copySection = document.getElementById('copy-section');
+            const roomSelection = document.getElementById('room-selection');
+            const waitingSection = document.getElementById('waiting-section');
+            const copyBtn = document.getElementById('copy-btn');
+            const roomIdInput = document.getElementById('room-id-input');
+
+            // CREATE ROOM
+            if (createBtn) {
+                createBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('✓ Create room clicked');
+
+                    const roomId = multiplayerEngine.createRoom();
+                    roomDisplay.textContent = roomId;
+
+                    roomSelection.style.display = 'none';
+                    copySection.style.display = 'block';
+                    waitingSection.style.display = 'block';
+                });
+            }
+
+            // COPY BUTTON
+            if (copyBtn) {
+                copyBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const roomId = roomDisplay.textContent;
+                    navigator.clipboard.writeText(roomId);
+                    console.log('✓ Copied:', roomId);
+                    copyBtn.textContent = '✓ Copied!';
+                    setTimeout(() => {
+                        copyBtn.textContent = '📋 Copy ID';
+                    }, 2000);
+                });
+            }
+
+            // JOIN ROOM
+            if (joinBtn) {
+                joinBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('✓ Join button clicked');
+
+                    const roomId = roomIdInput.value.trim();
+                    console.log('✓ Room ID entered:', roomId);
+
+                    if (roomId) {
+                        multiplayerEngine.joinRoom(roomId);
+                        console.log('✓ Successfully joined room:', roomId);
+
+                        roomSelection.style.display = 'none';
+                        waitingSection.style.display = 'block';
+                    } else {
+                        alert('Please enter a room ID');
+                    }
+                });
+            }
+
+            // CANCEL BUTTON
+            if (cancelBtn) {
+                cancelBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('✓ Cancel clicked');
+
+                    roomSelection.style.display = 'block';
+                    copySection.style.display = 'none';
+                    waitingSection.style.display = 'none';
+                    roomIdInput.value = '';
+
+                    multiplayerEngine.roomId = null;
+                });
+            }
+
+            // CLOSE BUTTON (X)
+            if (closeBtn) {
+                closeBtn.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('✓ Close clicked');
+
+                    modal.classList.add('hidden');
+                    modal.style.display = 'none';
+
+                    roomSelection.style.display = 'block';
+                    copySection.style.display = 'none';
+                    waitingSection.style.display = 'none';
+                    roomIdInput.value = '';
+
+                    multiplayerEngine.roomId = null;
+                });
+            }
+
+            // CLICK OUTSIDE MODAL
+            if (modal) {
+                modal.addEventListener('click', function (e) {
+                    if (e.target === modal) {
+                        console.log('✓ Clicked outside modal');
+                        modal.classList.add('hidden');
+                        modal.style.display = 'none';
+
+                        roomSelection.style.display = 'block';
+                        copySection.style.display = 'none';
+                        waitingSection.style.display = 'none';
+                        roomIdInput.value = '';
+
+                        multiplayerEngine.roomId = null;
+                    }
+                });
+            }
+        });
+    </script>
 
     <!-- Modal Toggle Fix -->
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const modal = document.getElementById('multiplayer-modal');
             const btn = document.getElementById('multiplayer-btn');
-            
+
             if (btn && modal) {
-                btn.addEventListener('click', function(e) {
+                btn.addEventListener('click', function (e) {
                     e.preventDefault();
                     modal.classList.remove('hidden');
                     modal.style.display = 'flex';
                 });
-                
+
                 // Close modal
                 const closeBtn = document.getElementById('close-multiplayer-btn');
                 if (closeBtn) {
-                    closeBtn.addEventListener('click', function() {
+                    closeBtn.addEventListener('click', function () {
                         modal.classList.add('hidden');
                         modal.style.display = 'none';
                     });

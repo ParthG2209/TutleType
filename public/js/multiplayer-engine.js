@@ -10,6 +10,12 @@ class MultiplayerEngine {
     console.log('Room created:', this.roomId);
     return this.roomId;
   }
+  
+  joinRoom(roomId) {
+    this.roomId = roomId;
+    console.log('Joined room:', this.roomId);
+    return this.roomId;
+  }
 }
 
 const multiplayerEngine = new MultiplayerEngine();
@@ -71,11 +77,21 @@ document.addEventListener('DOMContentLoaded', function() {
     joinBtn.addEventListener('click', function(e) {
       e.preventDefault();
       e.stopPropagation();
+      console.log('✓ Join button clicked');
+      
       const roomId = roomIdInput.value.trim();
+      console.log('Room ID entered:', roomId);
+      
       if (roomId) {
         multiplayerEngine.joinRoom(roomId);
+        console.log('✓ Joined room:', roomId);
+        
         roomSelection.style.display = 'none';
         waitingSection.style.display = 'block';
+        console.log('✓ UI updated to waiting state');
+      } else {
+        console.warn('No room ID entered');
+        alert('Please enter a room ID');
       }
     });
   }
@@ -94,6 +110,7 @@ document.addEventListener('DOMContentLoaded', function() {
       roomIdInput.value = '';
       
       multiplayerEngine.roomId = null;
+      console.log('✓ Reset to room selection');
     });
   }
   
@@ -121,6 +138,7 @@ document.addEventListener('DOMContentLoaded', function() {
   if (modal) {
     modal.addEventListener('click', function(e) {
       if (e.target === modal) {
+        console.log('✓ Clicked outside modal');
         modal.classList.add('hidden');
         modal.style.display = 'none';
         
