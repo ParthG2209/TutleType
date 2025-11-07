@@ -1,24 +1,37 @@
+// ========== WAIT FOR FIREBASE TO LOAD ==========
+
+function waitForFirebase(callback) {
+  if (typeof firebase !== 'undefined') {
+    callback();
+  } else {
+    console.log('Waiting for Firebase...');
+    setTimeout(() => waitForFirebase(callback), 100);
+  }
+}
+
 // ========== FIREBASE CONFIGURATION ==========
 
-const firebaseConfig = {
-  apiKey: "AIzaSyB8W9yY_T5r-gU2iZSFRGo3x3lv95Ldoao",
-  authDomain: "tutletype.firebaseapp.com",
-  databaseURL: "https://tutletype-default-rtdb.asia-southeast1.firebasedatabase.app",
-  projectId: "tutletype",
-  storageBucket: "tutletype.firebasestorage.app",
-  messagingSenderId: "576421686799",
-  appId: "1:576421686799:web:29411c65938e55b7643d7a",
-  measurementId: "G-VRR26Z9PKZ"
-};
-
-// Initialize Firebase
 let app, db;
-try {
-  app = firebase.initializeApp(firebaseConfig);
-  db = firebase.database(app);
-  console.log('✓ Firebase connected');
-} catch (e) {
-  console.error('Firebase initialization error:', e);
+
+function initializeFirebase() {
+  const firebaseConfig = {
+    apiKey: "AIzaSyB8W9yY_T5r-gU2iZSFRGo3x3lv95Ldoao",
+    authDomain: "tutletype.firebaseapp.com",
+    databaseURL: "https://tutletype-default-rtdb.asia-southeast1.firebasedatabase.app",
+    projectId: "tutletype",
+    storageBucket: "tutletype.firebasestorage.app",
+    messagingSenderId: "576421686799",
+    appId: "1:576421686799:web:29411c65938e55b7643d7a",
+    measurementId: "G-VRR26Z9PKZ"
+  };
+
+  try {
+    app = firebase.initializeApp(firebaseConfig);
+    db = firebase.database(app);
+    console.log('✓ Firebase connected successfully');
+  } catch (e) {
+    console.error('Firebase initialization error:', e);
+  }
 }
 
 // ========== MULTIPLAYER ENGINE CLASS ==========
@@ -171,7 +184,6 @@ window.multiplayerEngine = multiplayerEngine;
 function initializeMultiplayerUI() {
   console.log('✓ Initializing multiplayer UI...');
   
-  // Load modal HTML
   const modalHTML = `
     <div id="multiplayer-modal" class="hidden">
       <div class="multiplayer-modal-content">
@@ -207,15 +219,10 @@ function initializeMultiplayerUI() {
   if (container) {
     container.innerHTML = modalHTML;
     console.log('✓ Modal HTML loaded');
+    setupMultiplayerHandlers();
   } else {
     console.error('Modal container not found!');
-    return;
   }
-  
-  // Wait a moment for DOM to update, then setup handlers
-  setTimeout(() => {
-    setupMultiplayerHandlers();
-  }, 100);
 }
 
 function setupMultiplayerHandlers() {
@@ -266,8 +273,6 @@ function setupMultiplayerHandlers() {
       
       console.log('✓ Room ID displayed:', roomId);
     });
-  } else {
-    console.error('Create room button not found!');
   }
   
   // Copy button
@@ -349,16 +354,15 @@ function setupMultiplayerHandlers() {
     }
   };
   
-  // Opponent stats update callback
-  window.onOpponentStatsUpdate = function(stats) {
-    console.log('Opponent stats:', stats);
-  };
-  
   console.log('✓ Multiplayer handlers setup complete');
 }
 
-// Initialize on DOM load
+// ========== START INITIALIZATION ==========
+
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('✓ DOM LOADED - Starting multiplayer initialization');
-  initializeMultiplayerUI();
+  console.log('✓ DOM LOADED');
+  waitForFirebase(() => {
+    initializeFirebase();
+    initializeMultiplayerUI();
+  });
 });
