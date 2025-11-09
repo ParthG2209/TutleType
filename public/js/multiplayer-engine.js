@@ -2,7 +2,6 @@
 console.log('🟢 multiplayer-engine.js loaded');
 
 // ========== FIREBASE CONFIGURATION ==========
-
 let app, db;
 let firebaseReady = false;
 
@@ -18,7 +17,6 @@ const firebaseConfig = {
 };
 
 // ========== MULTIPLAYER ENGINE CLASS ==========
-
 class MultiplayerEngine {
   constructor() {
     this.roomId = null;
@@ -30,30 +28,30 @@ class MultiplayerEngine {
     this.isConnected = false;
     console.log('✓ MultiplayerEngine instance created, playerId:', this.playerId);
   }
-  
+
   createRoom(callback) {
     console.log('📝 createRoom() method called');
     console.log('db exists?', !!db);
     console.log('firebaseReady?', firebaseReady);
-    
+
     if (!db) {
       console.error('❌ Database not initialized');
       alert('Firebase not ready. Please refresh the page.');
       if (callback) callback(null);
       return null;
     }
-    
+
     this.roomId = 'ROOM' + Math.floor(Math.random() * 100000).toString().padStart(5, '0');
     this.isHost = true;
     console.log('✓ Room ID generated:', this.roomId);
-    
+
     const roomData = {
       host: this.playerId,
       created: firebase.database.ServerValue.TIMESTAMP,
       status: 'waiting',
       players: {}
     };
-    
+
     roomData.players[this.playerId] = {
       status: 'ready',
       role: 'host',
@@ -61,10 +59,10 @@ class MultiplayerEngine {
       accuracy: 100,
       progress: 0
     };
-    
+
     console.log('📤 Attempting Firebase write to:', 'rooms/' + this.roomId);
     console.log('Data:', roomData);
-    
+
     db.ref('rooms/' + this.roomId).set(roomData)
       .then(() => {
         console.log('✅✅✅ Firebase write SUCCESS!');
@@ -78,22 +76,22 @@ class MultiplayerEngine {
         alert('Failed to create room: ' + err.message);
         if (callback) callback(null);
       });
-    
+
     return this.roomId;
   }
-  
+
   joinRoom(roomId, callback) {
     console.log('📝 Joining room:', roomId);
-    
+
     if (!db) {
       alert('Firebase not ready');
       if (callback) callback(false);
       return;
     }
-    
+
     this.roomId = roomId;
     this.isHost = false;
-    
+
     db.ref('rooms/' + roomId).once('value')
       .then(snapshot => {
         if (snapshot.exists()) {
@@ -104,7 +102,6 @@ class MultiplayerEngine {
             accuracy: 100,
             progress: 0
           };
-          
           return db.ref('rooms/' + roomId + '/players/' + this.playerId).set(playerData);
         } else {
           throw new Error('Room does not exist');
@@ -121,37 +118,37 @@ class MultiplayerEngine {
         if (callback) callback(false);
       });
   }
-  
+
   setupRoomListener() {
     if (!db || !this.roomId) return;
-    
+
     this.roomRef = db.ref('rooms/' + this.roomId + '/players');
-    
+
     this.roomRef.on('value', (snapshot) => {
       const players = snapshot.val();
       if (players) {
         const playerIds = Object.keys(players);
         console.log('👥 Players in room:', playerIds.length);
-        
+
         const opponent = playerIds.find(id => id !== this.playerId);
-        
+
         if (opponent && !this.isConnected) {
           this.opponentId = opponent;
           this.isConnected = true;
           console.log('✓✓✓ OPPONENT CONNECTED!');
-          
+
           if (window.onOpponentConnected) {
             window.onOpponentConnected();
           }
         }
-        
+
         if (opponent && window.onOpponentStatsUpdate) {
           window.onOpponentStatsUpdate(players[opponent]);
         }
       }
     });
   }
-  
+
   sendStats(stats) {
     if (db && this.roomId && this.playerId) {
       db.ref('rooms/' + this.roomId + '/players/' + this.playerId).update({
@@ -164,18 +161,18 @@ class MultiplayerEngine {
       });
     }
   }
-  
+
   disconnect() {
     console.log('✓ Disconnecting...');
-    
+
     if (db && this.roomId && this.playerId) {
       db.ref('rooms/' + this.roomId + '/players/' + this.playerId).remove();
     }
-    
+
     if (this.roomRef) {
       this.roomRef.off();
     }
-    
+
     this.listeners = [];
     this.roomId = null;
     this.opponentId = null;
@@ -184,17 +181,15 @@ class MultiplayerEngine {
 }
 
 // ========== GLOBAL INSTANCE ==========
-
 const multiplayerEngine = new MultiplayerEngine();
 window.multiplayerEngine = multiplayerEngine;
 console.log('✓ window.multiplayerEngine created');
 
 // ========== INITIALIZE FIREBASE ==========
-
 function initFirebase() {
   console.log('🔥 initFirebase() called');
   console.log('typeof firebase:', typeof firebase);
-  
+
   try {
     if (!firebase.apps || firebase.apps.length === 0) {
       app = firebase.initializeApp(firebaseConfig);
@@ -203,14 +198,13 @@ function initFirebase() {
       app = firebase.app();
       console.log('✓ Firebase app already exists');
     }
-    
+
     db = firebase.database();
     firebaseReady = true;
-    
+
     console.log('✅✅✅ Firebase READY!');
     console.log('Database URL:', firebaseConfig.databaseURL);
     console.log('db object:', db);
-    
   } catch (e) {
     console.error('❌ Firebase init error:', e);
     alert('Firebase initialization failed: ' + e.message);
@@ -218,77 +212,58 @@ function initFirebase() {
 }
 
 // ========== SETUP UI ==========
-
 function setupMultiplayerUI() {
   console.log('🎨 setupMultiplayerUI() called');
-  
+
   const container = document.getElementById('multiplayer-modal-container');
   console.log('Modal container found?', !!container);
-  
+
   if (!container) {
     console.error('❌ Modal container #multiplayer-modal-container NOT FOUND!');
-    console.log('All elements with id containing "modal":', 
-      Array.from(document.querySelectorAll('[id*="modal"]')).map(el => el.id));
     return;
   }
-  
+
   const modalHTML = `
     <div id="multiplayer-modal" class="hidden">
       <div class="multiplayer-modal-content">
         <h2>Multiplayer</h2>
         
-        <div id="room-selection" style="display: block;">
+        <div id="room-selection">
           <div class="section-header">Create or Join</div>
-          <button id="create-room-btn" type="button">Create Room</button>
+          <button id="create-room-btn">Create Room</button>
           
           <div class="join-input-group">
             <input type="text" id="room-id-input" placeholder="Enter Room ID...">
-            <button id="join-room-btn" type="button">Join</button>
+            <button id="join-room-btn">Join</button>
           </div>
         </div>
         
-        <div id="copy-section" style="display: none !important;">
-          <p style="margin-bottom: 10px; font-size: 14px;">Your Room ID:</p>
-          <p style="margin-bottom: 15px;"><span id="room-id-display" style="font-size: 24px; font-weight: bold; color: var(--accent-color);">ROOM00000</span></p>
-          <button id="copy-btn" type="button">📋 Copy Room ID</button>
+        <div id="copy-section">
+          <p>Your Room ID:</p>
+          <p><span id="room-id-display">ROOM00000</span></p>
+          <button id="copy-btn">📋 Copy ID</button>
         </div>
         
-        <div id="waiting-section" style="display: none !important;">
-          <p style="margin-bottom: 20px; text-align: center; font-size: 16px;">⏳ Waiting for opponent to join...</p>
-          <button id="cancel-waiting-btn" type="button">Cancel & Close</button>
+        <div id="waiting-section">
+          <p>⏳ Waiting for opponent to join...</p>
+          <button id="cancel-waiting-btn">Cancel</button>
         </div>
         
         <button id="close-multiplayer-btn" type="button">✕</button>
       </div>
     </div>
   `;
-  
+
   container.innerHTML = modalHTML;
-  console.log('✓ Modal HTML injected into container');
-  
-  // Check if modal exists immediately
-  const modal = document.getElementById('multiplayer-modal');
-  console.log('Modal exists after injection?', !!modal);
-  
-  // Check if button exists immediately
-  const btn = document.getElementById('create-room-btn');
-  console.log('Create button exists after injection?', !!btn);
-  
-  if (btn) {
-    console.log('Button element:', btn);
-    console.log('Button innerHTML:', btn.innerHTML);
-  }
-  
-  // Wait for DOM to settle, then attach listeners
-  setTimeout(() => {
-    console.log('⏰ setTimeout fired, calling attachEventListeners()');
-    attachEventListeners();
-  }, 200);
+  console.log('✓ Modal HTML injected');
+
+  setupMultiplayerHandlers();
 }
 
-function attachEventListeners() {
-  console.log('🔗 attachEventListeners() called');
-  
+// ========== SETUP EVENT HANDLERS ==========
+function setupMultiplayerHandlers() {
+  console.log('🎮 setupMultiplayerHandlers() called');
+
   const multiplayerBtn = document.getElementById('multiplayer-btn');
   const modal = document.getElementById('multiplayer-modal');
   const createBtn = document.getElementById('create-room-btn');
@@ -301,143 +276,67 @@ function attachEventListeners() {
   const waitingSection = document.getElementById('waiting-section');
   const copyBtn = document.getElementById('copy-btn');
   const roomIdInput = document.getElementById('room-id-input');
-  
-  console.log('🔍 Element check:');
-  console.log('  multiplayerBtn:', !!multiplayerBtn, multiplayerBtn);
-  console.log('  modal:', !!modal, modal);
-  console.log('  createBtn:', !!createBtn, createBtn);
-  console.log('  joinBtn:', !!joinBtn, joinBtn);
-  console.log('  cancelBtn:', !!cancelBtn);
-  console.log('  closeBtn:', !!closeBtn);
-  
-  if (!multiplayerBtn) {
-    console.error('❌ CRITICAL: #multiplayer-btn not found in DOM!');
-    console.log('Searching for elements with "multiplayer" in id:');
-    document.querySelectorAll('[id*="multiplayer"]').forEach(el => {
-      console.log('  Found:', el.id, el);
-    });
-    return;
-  }
-  
-  if (!modal) {
-    console.error('❌ CRITICAL: #multiplayer-modal not found after injection!');
-    return;
-  }
-  
-  if (!createBtn) {
-    console.error('❌ CRITICAL: #create-room-btn not found after injection!');
-    console.log('Content of modal:', modal.innerHTML.substring(0, 500));
-    return;
-  }
-  
+
   // Open modal
-  multiplayerBtn.addEventListener('click', function(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    console.log('🖱️ Multiplayer button CLICKED');
-    modal.classList.remove('hidden');
-    console.log('Modal hidden class removed');
-  });
-  console.log('✓ Multiplayer button listener attached');
-  
-  // Create room - MULTIPLE METHODS
-  createBtn.onclick = function(e) {
-    console.log('🚀🚀🚀 CREATE ROOM CLICKED (onclick)! 🚀🚀🚀');
-    e.preventDefault();
-    e.stopPropagation();
-    handleCreateRoom();
-  };
-  
-  createBtn.addEventListener('click', function(e) {
-    console.log('🚀🚀🚀 CREATE ROOM CLICKED (addEventListener)! 🚀🚀🚀');
-    e.preventDefault();
-    e.stopPropagation();
-  });
-  
-  createBtn.addEventListener('mousedown', function(e) {
-    console.log('🖱️ CREATE ROOM MOUSEDOWN!');
-  });
-  
-  console.log('✓ Create button listeners attached (onclick + addEventListener)');
-  
-  function handleCreateRoom() {
-    console.log('📞 handleCreateRoom() called');
-    console.log('firebaseReady:', firebaseReady);
-    console.log('db:', db);
-    
-    if (!firebaseReady || !db) {
-      alert('Firebase not ready. Please wait and try again.');
-      console.error('Firebase not ready, aborting');
-      return;
-    }
-    
-    createBtn.disabled = true;
-    createBtn.textContent = 'Creating...';
-    console.log('Button disabled, text changed');
-    console.log('Calling multiplayerEngine.createRoom()...');
-    
-    multiplayerEngine.createRoom((roomId) => {
-      console.log('✅ createRoom callback received');
-      console.log('roomId:', roomId);
-      
-      if (roomId) {
-        // Update UI with !important to override CSS
-        roomDisplay.textContent = roomId;
-        roomSelection.style.cssText = 'display: none !important;';
-        copySection.style.cssText = 'display: block !important; background: var(--bg-secondary); padding: 20px; border-radius: 8px; margin-bottom: 20px;';
-        waitingSection.style.cssText = 'display: block !important; padding: 20px;';
-        console.log('✓ UI updated successfully');
-        console.log('Room ID displayed:', roomDisplay.textContent);
-        console.log('copySection display:', copySection.style.display);
-        console.log('waitingSection display:', waitingSection.style.display);
-      } else {
-        createBtn.disabled = false;
-        createBtn.textContent = 'Create Room';
-        console.error('Room creation returned null');
-      }
+  if (multiplayerBtn && modal) {
+    multiplayerBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('✓ Multiplayer button clicked');
+      modal.classList.remove('hidden');
     });
   }
-  
+
+  // Create room
+  if (createBtn) {
+    createBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      console.log('✓ Create room button clicked');
+
+      multiplayerEngine.createRoom((roomId) => {
+        if (roomId) {
+          roomDisplay.textContent = roomId;
+          roomSelection.style.display = 'none';
+          copySection.style.display = 'block';
+          waitingSection.style.display = 'block';
+          console.log('✓ Room ID displayed:', roomId);
+        }
+      });
+    });
+  }
+
   // Copy button
   if (copyBtn) {
     copyBtn.addEventListener('click', (e) => {
       e.preventDefault();
       const roomId = roomDisplay.textContent;
-      navigator.clipboard.writeText(roomId).then(() => {
-        copyBtn.textContent = '✓ Copied!';
-        setTimeout(() => copyBtn.textContent = '📋 Copy ID', 2000);
-      });
+      navigator.clipboard.writeText(roomId);
+      copyBtn.textContent = '✓ Copied!';
+      setTimeout(() => {
+        copyBtn.textContent = '📋 Copy ID';
+      }, 2000);
     });
-    console.log('✓ Copy button listener attached');
   }
-  
+
   // Join room
   if (joinBtn) {
     joinBtn.addEventListener('click', (e) => {
       e.preventDefault();
       const roomId = roomIdInput.value.trim().toUpperCase();
-      
-      if (!roomId) {
+
+      if (roomId) {
+        multiplayerEngine.joinRoom(roomId, (success) => {
+          if (success) {
+            roomSelection.style.display = 'none';
+            waitingSection.style.display = 'block';
+          }
+        });
+      } else {
         alert('Please enter a room ID');
-        return;
       }
-      
-      joinBtn.disabled = true;
-      joinBtn.textContent = 'Joining...';
-      
-      multiplayerEngine.joinRoom(roomId, (success) => {
-        if (success) {
-          roomSelection.style.display = 'none';
-          waitingSection.style.display = 'block';
-        }
-        joinBtn.disabled = false;
-        joinBtn.textContent = 'Join';
-      });
     });
-    console.log('✓ Join button listener attached');
   }
-  
-  // Cancel
+
+  // Cancel button
   if (cancelBtn) {
     cancelBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -446,13 +345,10 @@ function attachEventListeners() {
       copySection.style.display = 'none';
       waitingSection.style.display = 'none';
       roomIdInput.value = '';
-      createBtn.disabled = false;
-      createBtn.textContent = 'Create Room';
     });
-    console.log('✓ Cancel button listener attached');
   }
-  
-  // Close modal
+
+  // Close button
   if (closeBtn) {
     closeBtn.addEventListener('click', (e) => {
       e.preventDefault();
@@ -462,75 +358,135 @@ function attachEventListeners() {
       copySection.style.display = 'none';
       waitingSection.style.display = 'none';
       roomIdInput.value = '';
-      createBtn.disabled = false;
-      createBtn.textContent = 'Create Room';
     });
-    console.log('✓ Close button listener attached');
   }
+
+  // Click outside modal
+  if (modal) {
+    modal.addEventListener('click', (e) => {
+      if (e.target === modal) {
+        multiplayerEngine.disconnect();
+        modal.classList.add('hidden');
+        roomSelection.style.display = 'block';
+        copySection.style.display = 'none';
+        waitingSection.style.display = 'none';
+        roomIdInput.value = '';
+      }
+    });
+  }
+}
+
+// ========== OPPONENT CONNECTED CALLBACK - WITH START RACE BUTTON ==========
+window.onOpponentConnected = function() {
+  console.log('✓✓✓ OPPONENT CONNECTED! ✓✓✓');
   
-  // Click outside
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) {
-      multiplayerEngine.disconnect();
-      modal.classList.add('hidden');
-      roomSelection.style.display = 'block';
-      copySection.style.display = 'none';
-      waitingSection.style.display = 'none';
-      createBtn.disabled = false;
-      createBtn.textContent = 'Create Room';
-    }
-  });
-  console.log('✓ Modal outside click listener attached');
+  const waitingSection = document.getElementById('waiting-section');
+  const cancelBtn = document.getElementById('cancel-waiting-btn');
   
-  // Opponent callback
-  window.onOpponentConnected = function() {
-    console.log('✓✓✓ OPPONENT CONNECTED!');
-    const msg = document.querySelector('#waiting-section p');
+  if (waitingSection) {
+    // Update message
+    const msg = waitingSection.querySelector('p');
     if (msg) {
-      msg.innerHTML = '✓ <strong>Opponent connected!</strong> Ready to race!';
+      msg.innerHTML = '✓ <strong>Opponent connected!</strong>';
       msg.style.color = '#4ade80';
+      msg.style.fontSize = '18px';
+      msg.style.marginBottom = '20px';
     }
-  };
-  
-  console.log('✅✅✅ ALL EVENT LISTENERS ATTACHED SUCCESSFULLY!');
-}
-
-// ========== WAIT FOR FIREBASE SDK ==========
-
-function waitForFirebaseSDK(callback, attempts = 0) {
-  console.log('⏳ Waiting for Firebase SDK... attempt', attempts + 1);
-  
-  if (typeof firebase !== 'undefined' && firebase.database) {
-    console.log('✅ Firebase SDK loaded!');
-    callback();
-  } else if (attempts < 50) {
-    setTimeout(() => waitForFirebaseSDK(callback, attempts + 1), 100);
-  } else {
-    console.error('❌ Firebase SDK failed to load after 5 seconds');
-    alert('Firebase SDK failed to load. Please refresh the page.');
+    
+    // Hide cancel button
+    if (cancelBtn) {
+      cancelBtn.style.display = 'none';
+    }
+    
+    // Add Start Race button (only if it doesn't exist)
+    const existingStartBtn = document.getElementById('start-race-btn');
+    if (!existingStartBtn) {
+      const startBtn = document.createElement('button');
+      startBtn.id = 'start-race-btn';
+      startBtn.textContent = 'Start Race!';
+      startBtn.style.cssText = `
+        background: #e2b714 !important;
+        color: #323437 !important;
+        border: none !important;
+        padding: 16px 32px !important;
+        border-radius: 4px !important;
+        font-family: 'Roboto Mono', monospace !important;
+        font-weight: 700 !important;
+        font-size: 18px !important;
+        cursor: pointer !important;
+        width: 100% !important;
+        transition: all 0.2s !important;
+        text-transform: uppercase !important;
+        letter-spacing: 2px !important;
+      `;
+      
+      startBtn.addEventListener('click', () => {
+        console.log('🏁 START RACE CLICKED!');
+        
+        // Close modal
+        const modal = document.getElementById('multiplayer-modal');
+        if (modal) {
+          modal.classList.add('hidden');
+        }
+        
+        // Reset UI
+        const roomSelection = document.getElementById('room-selection');
+        const copySection = document.getElementById('copy-section');
+        if (roomSelection) roomSelection.style.display = 'block';
+        if (copySection) copySection.style.display = 'none';
+        if (waitingSection) waitingSection.style.display = 'none';
+        if (cancelBtn) cancelBtn.style.display = 'block';
+        
+        // Remove start button for next time
+        startBtn.remove();
+        
+        // Focus on typing input to start race
+        const userInput = document.getElementById('user-input');
+        if (userInput) {
+          userInput.focus();
+          console.log('✓ Race started! Input focused.');
+        }
+        
+        // Optional: Add a countdown
+        let countdown = 3;
+        const timerDisplay = document.getElementById('timer');
+        const countdownInterval = setInterval(() => {
+          if (timerDisplay) {
+            timerDisplay.textContent = countdown;
+          }
+          countdown--;
+          
+          if (countdown < 0) {
+            clearInterval(countdownInterval);
+            if (timerDisplay) {
+              timerDisplay.textContent = '30'; // Reset to default
+            }
+            console.log('✓ Countdown complete! GO!');
+          }
+        }, 1000);
+      });
+      
+      waitingSection.appendChild(startBtn);
+      console.log('✓ Start Race button added');
+    }
   }
-}
+};
 
-// ========== START ON DOM READY ==========
+// ========== OPPONENT STATS UPDATE ==========
+window.onOpponentStatsUpdate = function(stats) {
+  console.log('📊 Opponent stats:', stats);
+  // You can add UI here to show opponent's WPM/progress
+};
 
-function init() {
-  console.log('🚀 init() called');
-  console.log('document.readyState:', document.readyState);
+// ========== INITIALIZE ON DOM LOAD ==========
+document.addEventListener('DOMContentLoaded', () => {
+  console.log('✓ DOM loaded');
   
-  waitForFirebaseSDK(() => {
-    initFirebase();
-    setupMultiplayerUI();
-  });
-}
-
-console.log('📝 Checking document.readyState:', document.readyState);
-
-if (document.readyState === 'loading') {
-  console.log('Document still loading, adding DOMContentLoaded listener');
-  document.addEventListener('DOMContentLoaded', init);
-} else {
-  console.log('Document already loaded, calling init()');
-  init();
-}
-
-console.log('🟢 End of multiplayer-engine.js file');
+  if (typeof firebase === 'undefined') {
+    console.error('❌ Firebase SDK not loaded!');
+    return;
+  }
+  
+  initFirebase();
+  setupMultiplayerUI();
+});
