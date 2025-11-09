@@ -41,18 +41,11 @@ function initializeFirebase() {
     }
     
     db = firebase.database();
-    firebaseReady = true;
-    console.log('✓✓✓ Firebase connected successfully');
-    console.log('Database URL:', firebaseConfig.databaseURL);
     
-    // Test connection
-    db.ref('.info/connected').on('value', (snapshot) => {
-      if (snapshot.val() === true) {
-        console.log('✓ Firebase Realtime Database connected');
-      } else {
-        console.log('⚠️ Firebase Realtime Database disconnected');
-      }
-    });
+    // Set Firebase ready immediately
+    firebaseReady = true;
+    console.log('✓✓✓ Firebase initialized and ready');
+    console.log('Database URL:', firebaseConfig.databaseURL);
     
   } catch (e) {
     console.error('❌ Firebase initialization error:', e);
