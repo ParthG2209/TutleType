@@ -4,7 +4,7 @@ function waitForFirebase(callback, attempts = 0) {
   if (typeof firebase !== 'undefined' && firebase.database) {
     console.log('✓ Firebase SDK loaded');
     callback();
-  } else if (attempts < 50) { // Try for 5 seconds max
+  } else if (attempts < 50) {
     console.log(`⏳ Waiting for Firebase... (attempt ${attempts + 1})`);
     setTimeout(() => waitForFirebase(callback, attempts + 1), 100);
   } else {
@@ -34,13 +34,13 @@ function initializeFirebase() {
 
   try {
     // Check if already initialized
-    if (firebase.apps.length === 0) {
+    if (!firebase.apps || firebase.apps.length === 0) {
       app = firebase.initializeApp(firebaseConfig);
     } else {
       app = firebase.app();
     }
     
-    db = firebase.database(app);
+    db = firebase.database();
     firebaseReady = true;
     console.log('✓✓✓ Firebase connected successfully');
     console.log('Database URL:', firebaseConfig.databaseURL);
@@ -58,6 +58,7 @@ function initializeFirebase() {
     console.error('❌ Firebase initialization error:', e);
     console.error('Error details:', e.message, e.stack);
     firebaseReady = false;
+    alert('Failed to initialize Firebase: ' + e.message);
   }
 }
 
@@ -74,75 +75,94 @@ class MultiplayerEngine {
     this.isConnected = false;
   }
   
-  createRoom() {
+  createRoom(callback) {
     console.log('📝 Creating room...');
-    this.roomId = 'ROOM' + Math.floor(Math.random() * 100000).toString().padStart(5, '0');
-    this.isHost = true;
-    console.log('✓ Room created (HOST):', this.roomId);
     
-    if (!db) {
-      console.error('❌ Firebase database not initialized!');
-      alert('Firebase not ready. Please refresh the page.');
+    // Check if Firebase is ready
+    if (!firebaseReady || !db) {
+      console.error('❌ Firebase not ready!');
+      alert('Firebase is not ready yet. Please wait a moment and try again.');
+      if (callback) callback(null);
       return null;
     }
     
-    db.ref('rooms/' + this.roomId).set({
+    this.roomId = 'ROOM' + Math.floor(Math.random() * 100000).toString().padStart(5, '0');
+    this.isHost = true;
+    console.log('✓ Room ID generated:', this.roomId);
+    
+    const roomData = {
       host: this.playerId,
       created: firebase.database.ServerValue.TIMESTAMP,
       status: 'waiting',
-      players: {
-        [this.playerId]: {
-          status: 'ready',
-          role: 'host',
-          wpm: 0,
-          accuracy: 100,
-          progress: 0
-        }
-      }
-    }).then(() => {
-      console.log('✓ Room created in Firebase');
-      this.setupRoomListener();
-    }).catch(err => {
-      console.error('❌ Error creating room:', err);
-      alert('Failed to create room: ' + err.message);
-    });
+      players: {}
+    };
+    
+    roomData.players[this.playerId] = {
+      status: 'ready',
+      role: 'host',
+      wpm: 0,
+      accuracy: 100,
+      progress: 0
+    };
+    
+    console.log('📤 Sending data to Firebase...', roomData);
+    
+    db.ref('rooms/' + this.roomId).set(roomData)
+      .then(() => {
+        console.log('✓✓✓ Room created successfully in Firebase!');
+        this.setupRoomListener();
+        if (callback) callback(this.roomId);
+      })
+      .catch(err => {
+        console.error('❌ Error creating room:', err);
+        console.error('Error code:', err.code);
+        console.error('Error message:', err.message);
+        alert('Failed to create room: ' + err.message);
+        if (callback) callback(null);
+      });
     
     return this.roomId;
   }
   
-  joinRoom(roomId) {
+  joinRoom(roomId, callback) {
     console.log('📝 Joining room:', roomId);
+    
+    if (!firebaseReady || !db) {
+      console.error('❌ Firebase not ready!');
+      alert('Firebase is not ready yet. Please wait and try again.');
+      if (callback) callback(false);
+      return;
+    }
+    
     this.roomId = roomId;
     this.isHost = false;
     
-    if (!db) {
-      console.error('❌ Firebase database not initialized!');
-      alert('Firebase not ready. Please refresh the page.');
-      return null;
-    }
-    
-    db.ref('rooms/' + roomId).once('value').then(snapshot => {
-      if (snapshot.exists()) {
-        db.ref('rooms/' + roomId + '/players/' + this.playerId).set({
-          status: 'ready',
-          role: 'guest',
-          wpm: 0,
-          accuracy: 100,
-          progress: 0
-        }).then(() => {
-          console.log('✓ Joined room in Firebase');
-          this.setupRoomListener();
-        });
-      } else {
-        console.error('❌ Room does not exist');
-        alert('Room not found! Check the Room ID.');
-      }
-    }).catch(err => {
-      console.error('❌ Error joining room:', err);
-      alert('Failed to join room: ' + err.message);
-    });
-    
-    return this.roomId;
+    db.ref('rooms/' + roomId).once('value')
+      .then(snapshot => {
+        if (snapshot.exists()) {
+          const playerData = {
+            status: 'ready',
+            role: 'guest',
+            wpm: 0,
+            accuracy: 100,
+            progress: 0
+          };
+          
+          return db.ref('rooms/' + roomId + '/players/' + this.playerId).set(playerData);
+        } else {
+          throw new Error('Room does not exist');
+        }
+      })
+      .then(() => {
+        console.log('✓ Joined room successfully');
+        this.setupRoomListener();
+        if (callback) callback(true);
+      })
+      .catch(err => {
+        console.error('❌ Error joining room:', err);
+        alert('Failed to join room: ' + (err.message || 'Room not found'));
+        if (callback) callback(false);
+      });
   }
   
   setupRoomListener() {
@@ -307,27 +327,33 @@ function setupMultiplayerHandlers() {
       e.stopPropagation();
       console.log('🚀 Create room button clicked!');
       
+      // Check Firebase status first
+      if (!firebaseReady) {
+        alert('Firebase is still loading. Please wait a moment and try again.');
+        return;
+      }
+      
       // Disable button to prevent double-clicks
       createBtn.disabled = true;
       createBtn.textContent = 'Creating...';
       
       try {
-        const roomId = multiplayerEngine.createRoom();
-        
-        if (roomId) {
-          console.log('✓ Room ID generated:', roomId);
-          roomDisplay.textContent = roomId;
-          
-          roomSelection.style.display = 'none';
-          copySection.style.display = 'block';
-          waitingSection.style.display = 'block';
-          
-          console.log('✓ UI updated successfully');
-        } else {
-          console.error('❌ Failed to generate room ID');
-          createBtn.disabled = false;
-          createBtn.textContent = 'Create Room';
-        }
+        multiplayerEngine.createRoom((roomId) => {
+          if (roomId) {
+            console.log('✓ Room created successfully:', roomId);
+            roomDisplay.textContent = roomId;
+            
+            roomSelection.style.display = 'none';
+            copySection.style.display = 'block';
+            waitingSection.style.display = 'block';
+            
+            console.log('✓ UI updated successfully');
+          } else {
+            console.error('❌ Failed to create room');
+            createBtn.disabled = false;
+            createBtn.textContent = 'Create Room';
+          }
+        });
       } catch (error) {
         console.error('❌ Error in create room handler:', error);
         alert('Failed to create room: ' + error.message);
@@ -365,14 +391,28 @@ function setupMultiplayerHandlers() {
       e.stopPropagation();
       const roomId = roomIdInput.value.trim().toUpperCase();
       
-      if (roomId) {
-        console.log('📝 Attempting to join room:', roomId);
-        multiplayerEngine.joinRoom(roomId);
-        roomSelection.style.display = 'none';
-        waitingSection.style.display = 'block';
-      } else {
+      if (!roomId) {
         alert('Please enter a room ID');
+        return;
       }
+      
+      if (!firebaseReady) {
+        alert('Firebase is still loading. Please wait and try again.');
+        return;
+      }
+      
+      console.log('📝 Attempting to join room:', roomId);
+      joinBtn.disabled = true;
+      joinBtn.textContent = 'Joining...';
+      
+      multiplayerEngine.joinRoom(roomId, (success) => {
+        if (success) {
+          roomSelection.style.display = 'none';
+          waitingSection.style.display = 'block';
+        }
+        joinBtn.disabled = false;
+        joinBtn.textContent = 'Join';
+      });
     });
   }
   
