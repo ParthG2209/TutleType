@@ -237,9 +237,9 @@ function setupMultiplayerUI() {
       <div class="multiplayer-modal-content">
         <h2>Multiplayer</h2>
         
-        <div id="room-selection">
+        <div id="room-selection" style="display: block;">
           <div class="section-header">Create or Join</div>
-          <button id="create-room-btn" type="button" style="background: red; color: white; padding: 20px; font-size: 18px; cursor: pointer;">CREATE ROOM (CLICK ME)</button>
+          <button id="create-room-btn" type="button">Create Room</button>
           
           <div class="join-input-group">
             <input type="text" id="room-id-input" placeholder="Enter Room ID...">
@@ -247,15 +247,15 @@ function setupMultiplayerUI() {
           </div>
         </div>
         
-        <div id="copy-section" style="display: none;">
-          <p>Your Room ID:</p>
-          <p><span id="room-id-display">ROOM00000</span></p>
-          <button id="copy-btn" type="button">📋 Copy ID</button>
+        <div id="copy-section" style="display: none !important;">
+          <p style="margin-bottom: 10px; font-size: 14px;">Your Room ID:</p>
+          <p style="margin-bottom: 15px;"><span id="room-id-display" style="font-size: 24px; font-weight: bold; color: var(--accent-color);">ROOM00000</span></p>
+          <button id="copy-btn" type="button">📋 Copy Room ID</button>
         </div>
         
-        <div id="waiting-section" style="display: none;">
-          <p>⏳ Waiting for opponent to join...</p>
-          <button id="cancel-waiting-btn" type="button">Cancel</button>
+        <div id="waiting-section" style="display: none !important;">
+          <p style="margin-bottom: 20px; text-align: center; font-size: 16px;">⏳ Waiting for opponent to join...</p>
+          <button id="cancel-waiting-btn" type="button">Cancel & Close</button>
         </div>
         
         <button id="close-multiplayer-btn" type="button">✕</button>
@@ -381,11 +381,15 @@ function attachEventListeners() {
       console.log('roomId:', roomId);
       
       if (roomId) {
+        // Update UI with !important to override CSS
         roomDisplay.textContent = roomId;
-        roomSelection.style.display = 'none';
-        copySection.style.display = 'block';
-        waitingSection.style.display = 'block';
+        roomSelection.style.cssText = 'display: none !important;';
+        copySection.style.cssText = 'display: block !important; background: var(--bg-secondary); padding: 20px; border-radius: 8px; margin-bottom: 20px;';
+        waitingSection.style.cssText = 'display: block !important; padding: 20px;';
         console.log('✓ UI updated successfully');
+        console.log('Room ID displayed:', roomDisplay.textContent);
+        console.log('copySection display:', copySection.style.display);
+        console.log('waitingSection display:', waitingSection.style.display);
       } else {
         createBtn.disabled = false;
         createBtn.textContent = 'Create Room';
