@@ -238,13 +238,13 @@ function setupMultiplayerUI() {
           </div>
         </div>
         
-        <div id="copy-section">
+        <div id="copy-section" style="display: none;">
           <p>Your Room ID:</p>
           <p><span id="room-id-display">ROOM00000</span></p>
           <button id="copy-btn">📋 Copy ID</button>
         </div>
         
-        <div id="waiting-section">
+        <div id="waiting-section" style="display: none;">
           <p>⏳ Waiting for opponent to join...</p>
           <button id="cancel-waiting-btn">Cancel</button>
         </div>
@@ -294,11 +294,15 @@ function setupMultiplayerHandlers() {
 
       multiplayerEngine.createRoom((roomId) => {
         if (roomId) {
+          console.log('✓ Room created, updating UI...');
           roomDisplay.textContent = roomId;
+          
+          // Use inline styles to ensure visibility
           roomSelection.style.display = 'none';
           copySection.style.display = 'block';
           waitingSection.style.display = 'block';
-          console.log('✓ Room ID displayed:', roomId);
+          
+          console.log('✓ UI updated - showing copy section and waiting section');
         }
       });
     });
@@ -309,11 +313,15 @@ function setupMultiplayerHandlers() {
     copyBtn.addEventListener('click', (e) => {
       e.preventDefault();
       const roomId = roomDisplay.textContent;
-      navigator.clipboard.writeText(roomId);
-      copyBtn.textContent = '✓ Copied!';
-      setTimeout(() => {
-        copyBtn.textContent = '📋 Copy ID';
-      }, 2000);
+      navigator.clipboard.writeText(roomId).then(() => {
+        copyBtn.textContent = '✓ Copied!';
+        setTimeout(() => {
+          copyBtn.textContent = '📋 Copy ID';
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy:', err);
+        alert('Failed to copy room ID');
+      });
     });
   }
 
@@ -324,10 +332,14 @@ function setupMultiplayerHandlers() {
       const roomId = roomIdInput.value.trim().toUpperCase();
 
       if (roomId) {
+        console.log('✓ Attempting to join room:', roomId);
         multiplayerEngine.joinRoom(roomId, (success) => {
           if (success) {
+            console.log('✓ Join successful, updating UI...');
             roomSelection.style.display = 'none';
             waitingSection.style.display = 'block';
+            copySection.style.display = 'none';
+            console.log('✓ UI updated - showing waiting section');
           }
         });
       } else {
@@ -340,6 +352,7 @@ function setupMultiplayerHandlers() {
   if (cancelBtn) {
     cancelBtn.addEventListener('click', (e) => {
       e.preventDefault();
+      console.log('✓ Cancel clicked');
       multiplayerEngine.disconnect();
       roomSelection.style.display = 'block';
       copySection.style.display = 'none';
@@ -352,6 +365,7 @@ function setupMultiplayerHandlers() {
   if (closeBtn) {
     closeBtn.addEventListener('click', (e) => {
       e.preventDefault();
+      console.log('✓ Close clicked');
       multiplayerEngine.disconnect();
       modal.classList.add('hidden');
       roomSelection.style.display = 'block';
@@ -365,6 +379,7 @@ function setupMultiplayerHandlers() {
   if (modal) {
     modal.addEventListener('click', (e) => {
       if (e.target === modal) {
+        console.log('✓ Clicked outside modal');
         multiplayerEngine.disconnect();
         modal.classList.add('hidden');
         roomSelection.style.display = 'block';
@@ -376,99 +391,118 @@ function setupMultiplayerHandlers() {
   }
 }
 
-// ========== OPPONENT CONNECTED CALLBACK - WITH START RACE BUTTON ==========
+// ========== OPPONENT CONNECTED CALLBACK ==========
 window.onOpponentConnected = function() {
-  console.log('✓✓✓ OPPONENT CONNECTED! ✓✓✓');
+  console.log('✓✓✓ OPPONENT CONNECTED CALLBACK TRIGGERED! ✓✓✓');
   
   const waitingSection = document.getElementById('waiting-section');
   const cancelBtn = document.getElementById('cancel-waiting-btn');
   
-  if (waitingSection) {
-    // Update message
-    const msg = waitingSection.querySelector('p');
-    if (msg) {
-      msg.innerHTML = '✓ <strong>Opponent connected!</strong>';
-      msg.style.color = '#4ade80';
-      msg.style.fontSize = '18px';
-      msg.style.marginBottom = '20px';
-    }
+  if (!waitingSection) {
+    console.error('❌ Waiting section not found!');
+    return;
+  }
+  
+  console.log('✓ Waiting section found, updating UI...');
+  
+  // Update message
+  const msg = waitingSection.querySelector('p');
+  if (msg) {
+    msg.innerHTML = '✅ <strong>Opponent connected!</strong>';
+    msg.style.color = '#4ade80';
+    msg.style.fontSize = '18px';
+    msg.style.marginBottom = '20px';
+    console.log('✓ Message updated');
+  }
+  
+  // Hide cancel button
+  if (cancelBtn) {
+    cancelBtn.style.display = 'none';
+    console.log('✓ Cancel button hidden');
+  }
+  
+  // Add Start Race button (only if it doesn't exist)
+  const existingStartBtn = document.getElementById('start-race-btn');
+  if (!existingStartBtn) {
+    console.log('✓ Creating Start Race button...');
+    const startBtn = document.createElement('button');
+    startBtn.id = 'start-race-btn';
+    startBtn.textContent = 'Start Race!';
+    startBtn.style.cssText = `
+      background: #e2b714 !important;
+      color: #323437 !important;
+      border: none !important;
+      padding: 16px 32px !important;
+      border-radius: 4px !important;
+      font-family: 'Roboto Mono', monospace !important;
+      font-weight: 700 !important;
+      font-size: 18px !important;
+      cursor: pointer !important;
+      width: 100% !important;
+      transition: all 0.2s !important;
+      text-transform: uppercase !important;
+      letter-spacing: 2px !important;
+      margin-top: 10px !important;
+    `;
     
-    // Hide cancel button
-    if (cancelBtn) {
-      cancelBtn.style.display = 'none';
-    }
-    
-    // Add Start Race button (only if it doesn't exist)
-    const existingStartBtn = document.getElementById('start-race-btn');
-    if (!existingStartBtn) {
-      const startBtn = document.createElement('button');
-      startBtn.id = 'start-race-btn';
-      startBtn.textContent = 'Start Race!';
-      startBtn.style.cssText = `
-        background: #e2b714 !important;
-        color: #323437 !important;
-        border: none !important;
-        padding: 16px 32px !important;
-        border-radius: 4px !important;
-        font-family: 'Roboto Mono', monospace !important;
-        font-weight: 700 !important;
-        font-size: 18px !important;
-        cursor: pointer !important;
-        width: 100% !important;
-        transition: all 0.2s !important;
-        text-transform: uppercase !important;
-        letter-spacing: 2px !important;
-      `;
+    startBtn.addEventListener('click', () => {
+      console.log('🏁 START RACE CLICKED!');
       
-      startBtn.addEventListener('click', () => {
-        console.log('🏁 START RACE CLICKED!');
-        
-        // Close modal
-        const modal = document.getElementById('multiplayer-modal');
-        if (modal) {
-          modal.classList.add('hidden');
+      // Close modal
+      const modal = document.getElementById('multiplayer-modal');
+      if (modal) {
+        modal.classList.add('hidden');
+        console.log('✓ Modal closed');
+      }
+      
+      // Reset UI
+      const roomSelection = document.getElementById('room-selection');
+      const copySection = document.getElementById('copy-section');
+      if (roomSelection) roomSelection.style.display = 'block';
+      if (copySection) copySection.style.display = 'none';
+      if (waitingSection) waitingSection.style.display = 'none';
+      if (cancelBtn) cancelBtn.style.display = 'block';
+      
+      // Remove start button for next time
+      startBtn.remove();
+      
+      // Reset message
+      if (msg) {
+        msg.innerHTML = '⏳ Waiting for opponent to join...';
+        msg.style.color = '';
+        msg.style.fontSize = '';
+      }
+      
+      // Focus on typing input to start race
+      const userInput = document.getElementById('user-input');
+      if (userInput) {
+        userInput.focus();
+        console.log('✓ Race started! Input focused.');
+      }
+      
+      // Optional: Add a countdown
+      let countdown = 3;
+      const timerDisplay = document.getElementById('timer');
+      const countdownInterval = setInterval(() => {
+        if (timerDisplay) {
+          timerDisplay.textContent = countdown;
         }
+        countdown--;
         
-        // Reset UI
-        const roomSelection = document.getElementById('room-selection');
-        const copySection = document.getElementById('copy-section');
-        if (roomSelection) roomSelection.style.display = 'block';
-        if (copySection) copySection.style.display = 'none';
-        if (waitingSection) waitingSection.style.display = 'none';
-        if (cancelBtn) cancelBtn.style.display = 'block';
-        
-        // Remove start button for next time
-        startBtn.remove();
-        
-        // Focus on typing input to start race
-        const userInput = document.getElementById('user-input');
-        if (userInput) {
-          userInput.focus();
-          console.log('✓ Race started! Input focused.');
-        }
-        
-        // Optional: Add a countdown
-        let countdown = 3;
-        const timerDisplay = document.getElementById('timer');
-        const countdownInterval = setInterval(() => {
+        if (countdown < 0) {
+          clearInterval(countdownInterval);
           if (timerDisplay) {
-            timerDisplay.textContent = countdown;
+            timerDisplay.textContent = '30';
           }
-          countdown--;
-          
-          if (countdown < 0) {
-            clearInterval(countdownInterval);
-            if (timerDisplay) {
-              timerDisplay.textContent = '30'; // Reset to default
-            }
-            console.log('✓ Countdown complete! GO!');
-          }
-        }, 1000);
-      });
-      
-      waitingSection.appendChild(startBtn);
-      console.log('✓ Start Race button added');
-    }
+          console.log('✓ Countdown complete! GO!');
+        }
+      }, 1000);
+    });
+    
+    waitingSection.appendChild(startBtn);
+    console.log('✓ Start Race button added to DOM');
+  } else {
+    console.log('⚠ Start Race button already exists');
   }
 };
 
