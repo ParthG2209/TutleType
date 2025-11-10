@@ -1,4 +1,4 @@
-md
+
 # TutleType
 
 A minimalistic typing speed test application combining Monkeytype and TypeRacer features. Built with vanilla JavaScript for smooth performance. Includes time and word-based tests, real-time WPM tracking, 6 themes, and upcoming multiplayer mode for competitive racing.
