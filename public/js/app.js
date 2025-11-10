@@ -54,6 +54,29 @@ function updateActiveTheme(theme) {
     });
 }
 
+// ========== TAB MANAGEMENT ==========
+document.querySelectorAll('.tab-button').forEach(button => {
+    button.addEventListener('click', function(e) {
+        const tab = this.getAttribute('data-tab');
+        
+        // Handle multiplayer tab - redirect to multiplayer.html
+        if (tab === 'multi') {
+            e.preventDefault();
+            window.location.href = 'public/multiplayer.html';
+            return;
+        }
+        
+        // Handle other tabs (single player is default, leaderboard is disabled)
+        if (tab === 'single') {
+            // Already on single player page, just update active state
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            this.classList.add('active');
+        }
+    });
+});
+
 // ========== MODE TYPE BUTTONS ==========
 function setupModeTypeButtons() {
     document.querySelectorAll('[data-mode-type]').forEach(button => {
