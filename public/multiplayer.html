@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multiplayer Race - TutleType</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <link rel="stylesheet" href="public/css/styles.css">
+    <link rel="stylesheet" href="public/css/multiplayer.css">
+</head>
+<body class="theme-serika-dark min-h-screen">
+    <!-- Header -->
+    <div class="header-container">
+        <div class="flex items-center justify-between max-w-7xl mx-auto">
+            <a href="/" style="text-decoration: none; color: inherit; cursor: pointer;">
+                <div class="flex items-center gap-2">
+                    <div class="logo-circle"></div>
+                    <div>
+                        <h1 class="logo-title">TutleType</h1>
+                        <p class="tagline">We dropped the 'R' to save you one keystroke.</p>
+                    </div>
+                </div>
+            </a>
+
+            <div class="flex items-center gap-3">
+                <!-- Login Button -->
+                <a href="public/login.html" class="mode-button" style="text-decoration: none;">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+                        style="display: inline-block; vertical-align: middle; margin-right: 4px;">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                    login
+                </a>
+
+                <!-- Theme Selector -->
+                <div style="position: relative;">
+                    <button id="theme-button" class="theme-button">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                        </svg>
+                    </button>
+                    <div id="theme-dropdown" class="theme-dropdown hidden">
+                        <button class="theme-option active" data-theme="serika-dark">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #323437, #e2b714);"></span>
+                            Serika Dark
+                        </button>
+                        <button class="theme-option" data-theme="nord">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #2e3440, #88c0d0);"></span>
+                            Nord
+                        </button>
+                        <button class="theme-option" data-theme="dracula">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #282a36, #bd93f9);"></span>
+                            Dracula
+                        </button>
+                        <button class="theme-option" data-theme="light">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #f5f5f5, #4a9eff);"></span>
+                            Light
+                        </button>
+                        <button class="theme-option" data-theme="gruvbox">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #282828, #b8bb26);"></span>
+                            Gruvbox
+                        </button>
+                        <button class="theme-option" data-theme="botanical">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #1a2421, #9dff9a);"></span>
+                            Botanical
+                        </button>
+                        <button class="theme-option" data-theme="pihu">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #1a1a1a, #b89968);"></span>
+                            Pihu
+                        </button>
+                        <button class="theme-option" data-theme="sakura">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #fef5f1, #ff6b9d);"></span>
+                            Sakura
+                        </button>
+                        <button class="theme-option" data-theme="midnight-neon">
+                            <span class="theme-preview"
+                                style="background: linear-gradient(to right, #0a0e27, #ff006e);"></span>
+                            Midnight Neon
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <div class="container mx-auto px-4 max-w-5xl mt-10">
+        
+        <!-- ========== ROOM SETUP PHASE ========== -->
+        <div id="room-setup" class="mp-phase">
+            <div class="mp-card">
+                <h2 class="mp-title">Multiplayer Race</h2>
+                <p class="mp-subtitle">Compete in real-time with friends</p>
+                
+                <div class="mp-actions">
+                    <button id="create-room-btn" class="mp-btn mp-btn-primary mp-btn-large">
+                        <svg class="mp-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M12 4v16m8-8H4" />
+                        </svg>
+                        Create Room
+                    </button>
+                    
+                    <div class="mp-divider">
+                        <span>or</span>
+                    </div>
+                    
+                    <div class="mp-join-group">
+                        <input type="text" id="room-id-input" class="mp-input" 
+                            placeholder="Enter Room ID (e.g. ROOM12345)" maxlength="9" />
+                        <button id="join-room-btn" class="mp-btn mp-btn-primary">
+                            <svg class="mp-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
+                            </svg>
+                            Join Room
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="mp-back">
+                    <a href="/" class="mp-link">← Back to Home</a>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== WAITING PHASE ========== -->
+        <div id="room-waiting" class="mp-phase hidden">
+            <div class="mp-card">
+                <h2 class="mp-title">Waiting Room</h2>
+                
+                <div class="mp-room-info">
+                    <div class="mp-room-id-container">
+                        <span class="mp-label">Room ID:</span>
+                        <span id="room-id-display" class="mp-room-id">ROOM00000</span>
+                    </div>
+                    <button id="copy-room-btn" class="mp-btn mp-btn-secondary mp-btn-small">
+                        <svg class="mp-btn-icon-small" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z" />
+                        </svg>
+                        Copy
+                    </button>
+                </div>
+                
+                <div class="mp-players-grid">
+                    <div class="mp-player-card mp-player-local">
+                        <div class="mp-player-avatar">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <div class="mp-player-name" id="local-player-name">You</div>
+                        <div class="mp-player-status mp-status-ready">Ready</div>
+                    </div>
+                    
+                    <div class="mp-player-card mp-player-opponent">
+                        <div class="mp-player-avatar">
+                            <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                    d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                            </svg>
+                        </div>
+                        <div class="mp-player-name" id="opponent-player-name">Waiting...</div>
+                        <div class="mp-player-status" id="opponent-status">Connecting...</div>
+                    </div>
+                </div>
+                
+                <div class="mp-actions">
+                    <button id="start-race-btn" class="mp-btn mp-btn-primary mp-btn-large hidden">
+                        <svg class="mp-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        Start Race!
+                    </button>
+                    <button id="cancel-room-btn" class="mp-btn mp-btn-secondary">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========== RACING PHASE ========== -->
+        <div id="room-racing" class="mp-phase hidden">
+            <!-- Countdown Overlay -->
+            <div id="countdown-overlay" class="mp-countdown-overlay hidden">
+                <div class="mp-countdown-bg"></div>
+                <div class="mp-countdown-content">
+                    <div class="mp-countdown-text">Race starts in</div>
+                    <div id="countdown-number" class="mp-countdown-number">3</div>
+                </div>
+            </div>
+            
+            <!-- Race Progress Section -->
+            <div class="mp-race-progress">
+                <div class="mp-progress-item">
+                    <div class="mp-progress-header">
+                        <span class="mp-progress-label">
+                            <span class="mp-progress-icon">👤</span>
+                            <span id="local-racer-name">You</span>
+                        </span>
+                        <span id="local-words-count" class="mp-words-count">0/50</span>
+                    </div>
+                    <div class="mp-progress-bar">
+                        <div id="local-progress-fill" class="mp-progress-fill"></div>
+                    </div>
+                </div>
+                
+                <div class="mp-progress-item">
+                    <div class="mp-progress-header">
+                        <span class="mp-progress-label">
+                            <span class="mp-progress-icon">🏁</span>
+                            <span id="opponent-racer-name">Opponent</span>
+                        </span>
+                        <span id="opponent-words-count" class="mp-words-count">0/50</span>
+                    </div>
+                    <div class="mp-progress-bar">
+                        <div id="opponent-progress-fill" class="mp-progress-fill mp-progress-opponent"></div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Race Stats -->
+            <div class="mp-race-stats">
+                <div class="mp-stat-item">
+                    <div id="race-wpm" class="mp-stat-value">0</div>
+                    <div class="mp-stat-label">wpm</div>
+                </div>
+                <div class="mp-stat-item">
+                    <div id="race-accuracy" class="mp-stat-value">100%</div>
+                    <div class="mp-stat-label">accuracy</div>
+                </div>
+                <div class="mp-stat-item">
+                    <div id="race-time" class="mp-stat-value">0s</div>
+                    <div class="mp-stat-label">time</div>
+                </div>
+            </div>
+            
+            <!-- Typing Area -->
+            <div class="mp-typing-area">
+                <div id="race-text-display" class="mp-text-display"></div>
+            </div>
+            
+            <!-- Hidden Input -->
+            <input type="text" id="race-input" class="mp-hidden-input" 
+                autocomplete="off" autocapitalize="off" autocorrect="off">
+        </div>
+
+        <!-- ========== RESULTS PHASE ========== -->
+        <div id="room-results" class="mp-phase hidden">
+            <div class="mp-card">
+                <h2 class="mp-title">Race Results</h2>
+                
+                <div id="results-list" class="mp-results-list">
+                    <!-- Results will be injected here -->
+                </div>
+                
+                <div class="mp-actions">
+                    <button id="new-race-btn" class="mp-btn mp-btn-primary mp-btn-large">
+                        <svg class="mp-btn-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                        </svg>
+                        New Race
+                    </button>
+                    <button id="back-home-btn" class="mp-btn mp-btn-secondary">
+                        <svg class="mp-btn-icon-small" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Back to Home
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="text-center footer-text mt-10">
+        Fast, minimal, data-driven typing tests
+    </div>
+
+    <!-- Scripts -->
+    <script src="public/js/words.js"></script>
+    <script src="public/js/multiplayer-engine.js"></script>
+    <script src="public/js/multiplayer-race.js"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-// ========== DIAGNOSTIC LOGGING ==========
+// ========== MULTIPLAYER ENGINE (Backend Logic Only) ==========
 console.log('🟢 multiplayer-engine.js loaded');
 
 // ========== FIREBASE CONFIGURATION ==========
@@ -21,71 +21,94 @@ class MultiplayerEngine {
   constructor() {
     this.roomId = null;
     this.playerId = 'player_' + Math.random().toString(36).substr(2, 9);
+    this.displayName = 'Player' + Math.floor(Math.random() * 9999);
     this.opponentId = null;
+    this.opponentData = null;
     this.isHost = false;
     this.roomRef = null;
-    this.listeners = [];
-    this.isConnected = false;
-    console.log('✓ MultiplayerEngine instance created, playerId:', this.playerId);
+    this.raceStatus = 'idle'; // idle, countdown, in_progress, finished
+    this.countdownEndsAt = null;
+    this.startedAt = null;
+    this.finishedAt = null;
+    this.words = [];
+    this.totalWords = 0;
+    this.wordsCompleted = 0;
+    this.telemetryThrottle = null;
+    this.countdownInterval = null;
+    
+    console.log('✓ MultiplayerEngine created, playerId:', this.playerId);
   }
 
-  createRoom(callback) {
-    console.log('📝 createRoom() method called');
-    console.log('db exists?', !!db);
-    console.log('firebaseReady?', firebaseReady);
+  // ========== ROOM CREATION ==========
+  createRoom(wordSetId = 'default', wordCount = 50, callback) {
+    console.log('📝 Creating room with wordSetId:', wordSetId);
 
     if (!db) {
       console.error('❌ Database not initialized');
-      alert('Firebase not ready. Please refresh the page.');
-      if (callback) callback(null);
-      return null;
+      if (callback) callback(null, null);
+      return;
     }
 
     this.roomId = 'ROOM' + Math.floor(Math.random() * 100000).toString().padStart(5, '0');
     this.isHost = true;
-    console.log('✓ Room ID generated:', this.roomId);
+
+    // Generate locked word set for the race
+    if (typeof generateWords === 'function') {
+      this.words = generateWords(wordCount);
+    } else {
+      console.error('❌ generateWords function not found');
+      if (callback) callback(null, null);
+      return;
+    }
+
+    this.totalWords = this.words.length;
 
     const roomData = {
       host: this.playerId,
       created: firebase.database.ServerValue.TIMESTAMP,
-      status: 'waiting',
+      status: 'idle',
+      wordSetId: wordSetId,
+      words: this.words,
+      totalWords: this.totalWords,
+      countdownEndsAt: null,
+      startedAt: null,
+      finishedAt: null,
       players: {}
     };
 
     roomData.players[this.playerId] = {
-      status: 'ready',
+      displayName: this.displayName,
       role: 'host',
+      connected: true,
+      wordsCompleted: 0,
       wpm: 0,
       accuracy: 100,
-      progress: 0
+      timeElapsed: 0,
+      finishedAt: null,
+      lastUpdate: firebase.database.ServerValue.TIMESTAMP
     };
 
-    console.log('📤 Attempting Firebase write to:', 'rooms/' + this.roomId);
-    console.log('Data:', roomData);
+    console.log('📤 Writing room to Firebase:', this.roomId);
 
     db.ref('rooms/' + this.roomId).set(roomData)
       .then(() => {
-        console.log('✅✅✅ Firebase write SUCCESS!');
+        console.log('✅ Room created successfully');
         this.setupRoomListener();
-        if (callback) callback(this.roomId);
+        if (callback) callback(this.roomId, this.words);
       })
       .catch(err => {
-        console.error('❌❌❌ Firebase write FAILED:', err);
-        console.error('Error code:', err.code);
-        console.error('Error message:', err.message);
-        alert('Failed to create room: ' + err.message);
-        if (callback) callback(null);
+        console.error('❌ Room creation failed:', err);
+        if (callback) callback(null, null);
       });
-
-    return this.roomId;
   }
 
+  // ========== JOIN ROOM ==========
   joinRoom(roomId, callback) {
     console.log('📝 Joining room:', roomId);
 
     if (!db) {
-      alert('Firebase not ready');
-      if (callback) callback(false);
+      console.error('❌ Database not initialized');
+      if (callback) callback(false, null, null);
       return;
     }
 
@@ -94,433 +117,347 @@ class MultiplayerEngine {
 
     db.ref('rooms/' + roomId).once('value')
       .then(snapshot => {
-        if (snapshot.exists()) {
-          const playerData = {
-            status: 'ready',
-            role: 'guest',
-            wpm: 0,
-            accuracy: 100,
-            progress: 0
-          };
-          return db.ref('rooms/' + roomId + '/players/' + this.playerId).set(playerData);
-        } else {
+        if (!snapshot.exists()) {
           throw new Error('Room does not exist');
         }
+
+        const roomData = snapshot.val();
+        
+        // Load locked words and state from room
+        this.words = roomData.words || [];
+        this.totalWords = roomData.totalWords || this.words.length;
+        this.raceStatus = roomData.status || 'idle';
+        this.countdownEndsAt = roomData.countdownEndsAt;
+        this.startedAt = roomData.startedAt;
+
+        const playerData = {
+          displayName: this.displayName,
+          role: 'guest',
+          connected: true,
+          wordsCompleted: 0,
+          wpm: 0,
+          accuracy: 100,
+          timeElapsed: 0,
+          finishedAt: null,
+          lastUpdate: firebase.database.ServerValue.TIMESTAMP
+        };
+
+        return db.ref('rooms/' + roomId + '/players/' + this.playerId).set(playerData);
       })
       .then(() => {
-        console.log('✓ Joined room successfully');
+        console.log('✅ Joined room successfully');
         this.setupRoomListener();
-        if (callback) callback(true);
+        if (callback) callback(true, this.words, this.raceStatus);
       })
       .catch(err => {
-        console.error('❌ Error joining room:', err);
-        alert('Failed to join: ' + err.message);
-        if (callback) callback(false);
+        console.error('❌ Failed to join room:', err);
+        alert('Failed to join room: ' + err.message);
+        if (callback) callback(false, null, null);
       });
   }
 
+  // ========== ROOM LISTENER ==========
   setupRoomListener() {
     if (!db || !this.roomId) return;
 
-    this.roomRef = db.ref('rooms/' + this.roomId + '/players');
+    this.roomRef = db.ref('rooms/' + this.roomId);
 
     this.roomRef.on('value', (snapshot) => {
-      const players = snapshot.val();
-      if (players) {
-        const playerIds = Object.keys(players);
-        console.log('👥 Players in room:', playerIds.length);
+      const roomData = snapshot.val();
+      if (!roomData) return;
 
-        const opponent = playerIds.find(id => id !== this.playerId);
+      // Update room state
+      const prevStatus = this.raceStatus;
+      this.raceStatus = roomData.status;
+      this.countdownEndsAt = roomData.countdownEndsAt;
+      this.startedAt = roomData.startedAt;
+      this.finishedAt = roomData.finishedAt;
 
-        if (opponent && !this.isConnected) {
-          this.opponentId = opponent;
-          this.isConnected = true;
-          console.log('✓✓✓ OPPONENT CONNECTED!');
+      const players = roomData.players || {};
+      const playerIds = Object.keys(players);
 
-          if (window.onOpponentConnected) {
-            window.onOpponentConnected();
-          }
-        }
+      // Find and track opponent
+      const opponentId = playerIds.find(id => id !== this.playerId);
+      if (opponentId && !this.opponentId) {
+        this.opponentId = opponentId;
+        this.opponentData = players[opponentId];
+        console.log('✓ Opponent connected:', this.opponentData.displayName);
+        
+        // Trigger opponent connected event
+        this.triggerEvent('opponentConnected', this.opponentData);
+      }
 
-        if (opponent && window.onOpponentStatsUpdate) {
-          window.onOpponentStatsUpdate(players[opponent]);
+      // Update opponent data
+      if (opponentId && players[opponentId]) {
+        this.opponentData = players[opponentId];
+        this.triggerEvent('opponentUpdate', this.opponentData);
+      }
+
+      // Handle state transitions
+      if (prevStatus !== this.raceStatus) {
+        console.log('🔄 Race status changed:', prevStatus, '→', this.raceStatus);
+
+        if (this.raceStatus === 'countdown') {
+          this.handleCountdownStart();
+        } else if (this.raceStatus === 'in_progress') {
+          this.handleRaceStart();
+        } else if (this.raceStatus === 'finished') {
+          this.handleRaceFinish(roomData);
         }
       }
     });
+
+    // Handle disconnection
+    const connectedRef = db.ref('.info/connected');
+    connectedRef.on('value', (snapshot) => {
+      if (snapshot.val() === false) return;
+
+      // Set up automatic disconnect cleanup
+      db.ref('rooms/' + this.roomId + '/players/' + this.playerId + '/connected')
+        .onDisconnect()
+        .set(false);
+    });
   }
 
-  sendStats(stats) {
+  // ========== INITIATE RACE (Trigger Countdown) ==========
+  initiateRace(countdownSeconds = 3) {
+    console.log('🏁 Initiating race with', countdownSeconds, 's countdown');
+
+    if (this.raceStatus !== 'idle') {
+      console.warn('⚠ Cannot initiate race, current status:', this.raceStatus);
+      return;
+    }
+
+    const countdownEndsAt = Date.now() + (countdownSeconds * 1000);
+
+    db.ref('rooms/' + this.roomId).update({
+      status: 'countdown',
+      countdownEndsAt: countdownEndsAt
+    }).then(() => {
+      console.log('✅ Countdown initiated, ends at:', new Date(countdownEndsAt));
+    }).catch(err => {
+      console.error('❌ Failed to initiate countdown:', err);
+    });
+  }
+
+  // ========== HANDLE COUNTDOWN START ==========
+  handleCountdownStart() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+    }
+
+    console.log('⏱ Countdown started, ends at:', new Date(this.countdownEndsAt));
+    
+    this.triggerEvent('countdownStart', this.countdownEndsAt);
+
+    // Countdown tick every 100ms for accuracy
+    this.countdownInterval = setInterval(() => {
+      const remaining = Math.ceil((this.countdownEndsAt - Date.now()) / 1000);
+      
+      this.triggerEvent('countdownTick', remaining);
+
+      if (remaining <= 0) {
+        clearInterval(this.countdownInterval);
+        this.countdownInterval = null;
+
+        // Only host triggers race start
+        if (this.isHost) {
+          const startedAt = Date.now();
+          db.ref('rooms/' + this.roomId).update({
+            status: 'in_progress',
+            startedAt: startedAt
+          }).then(() => {
+            console.log('✅ Race started at:', new Date(startedAt));
+          });
+        }
+      }
+    }, 100);
+  }
+
+  // ========== HANDLE RACE START ==========
+  handleRaceStart() {
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
+
+    console.log('🚀 Race started at:', new Date(this.startedAt));
+    this.triggerEvent('raceStart', {
+      words: this.words,
+      startedAt: this.startedAt,
+      totalWords: this.totalWords
+    });
+  }
+
+  // ========== SEND TELEMETRY ==========
+  sendTelemetry(wordsCompleted, wpm, accuracy, timeElapsed) {
+    if (!db || !this.roomId || this.raceStatus !== 'in_progress') return;
+
+    // Throttle to ~10 updates/sec per room (100ms)
+    if (this.telemetryThrottle) return;
+
+    this.telemetryThrottle = setTimeout(() => {
+      this.telemetryThrottle = null;
+    }, 100);
+
+    this.wordsCompleted = wordsCompleted;
+
+    db.ref('rooms/' + this.roomId + '/players/' + this.playerId).update({
+      wordsCompleted: wordsCompleted,
+      wpm: wpm || 0,
+      accuracy: accuracy || 100,
+      timeElapsed: timeElapsed || 0,
+      lastUpdate: firebase.database.ServerValue.TIMESTAMP
+    }).catch(err => {
+      console.error('❌ Failed to send telemetry:', err);
+    });
+  }
+
+  // ========== FINISH RACE ==========
+  finishRace(wordsCompleted, wpm, accuracy, timeElapsed) {
+    console.log('🏁 Finishing race:', { wordsCompleted, wpm, accuracy, timeElapsed });
+
+    if (!db || !this.roomId) return;
+
+    const finishData = {
+      wordsCompleted: wordsCompleted,
+      wpm: wpm,
+      accuracy: accuracy,
+      timeElapsed: timeElapsed,
+      finishedAt: firebase.database.ServerValue.TIMESTAMP
+    };
+
+    db.ref('rooms/' + this.roomId + '/players/' + this.playerId)
+      .update(finishData)
+      .then(() => {
+        console.log('✅ Finish data sent');
+        // Check if all players finished
+        return db.ref('rooms/' + this.roomId + '/players').once('value');
+      })
+      .then(snapshot => {
+        const players = snapshot.val();
+        const allFinished = Object.values(players).every(p => p.finishedAt);
+
+        if (allFinished || Object.keys(players).length === 1) {
+          // Mark room as finished
+          return db.ref('rooms/' + this.roomId).update({
+            status: 'finished',
+            finishedAt: firebase.database.ServerValue.TIMESTAMP
+          });
+        }
+      })
+      .catch(err => {
+        console.error('❌ Failed to finish race:', err);
+      });
+  }
+
+  // ========== HANDLE RACE FINISH ==========
+  handleRaceFinish(roomData) {
+    console.log('🎉 Race finished!');
+
+    const players = roomData.players || {};
+    const results = Object.entries(players).map(([id, data]) => ({
+      playerId: id,
+      displayName: data.displayName || 'Unknown',
+      wordsCompleted: data.wordsCompleted || 0,
+      wpm: data.wpm || 0,
+      accuracy: data.accuracy || 100,
+      timeElapsed: data.timeElapsed || 0,
+      isLocalPlayer: id === this.playerId
+    }));
+
+    // Sort by wordsCompleted (desc), then timeElapsed (asc) for ties
+    results.sort((a, b) => {
+      if (b.wordsCompleted !== a.wordsCompleted) {
+        return b.wordsCompleted - a.wordsCompleted;
+      }
+      return a.timeElapsed - b.timeElapsed;
+    });
+
+    // Assign ranks with tie handling
+    let currentRank = 1;
+    results.forEach((result, index) => {
+      if (index > 0 && result.wordsCompleted === results[index - 1].wordsCompleted) {
+        result.rank = results[index - 1].rank;
+        result.tie = true;
+      } else {
+        result.rank = currentRank;
+        result.tie = false;
+      }
+      currentRank++;
+    });
+
+    this.triggerEvent('raceFinish', results);
+  }
+
+  // ========== DISCONNECT ==========
+  disconnect() {
+    console.log('🔌 Disconnecting from room');
+
+    if (this.countdownInterval) {
+      clearInterval(this.countdownInterval);
+      this.countdownInterval = null;
+    }
+
     if (db && this.roomId && this.playerId) {
       db.ref('rooms/' + this.roomId + '/players/' + this.playerId).update({
-        wpm: stats.wpm || 0,
-        accuracy: stats.accuracy || 100,
-        progress: stats.progress || 0,
-        timestamp: firebase.database.ServerValue.TIMESTAMP
-      }).catch(err => {
-        console.error('Error updating stats:', err);
+        connected: false
       });
-    }
-  }
-
-  disconnect() {
-    console.log('✓ Disconnecting...');
-
-    if (db && this.roomId && this.playerId) {
-      db.ref('rooms/' + this.roomId + '/players/' + this.playerId).remove();
     }
 
     if (this.roomRef) {
       this.roomRef.off();
+      this.roomRef = null;
     }
 
-    this.listeners = [];
     this.roomId = null;
     this.opponentId = null;
-    this.isConnected = false;
+    this.opponentData = null;
+    this.raceStatus = 'idle';
+    this.wordsCompleted = 0;
+  }
+
+  // ========== EVENT SYSTEM ==========
+  triggerEvent(eventName, data) {
+    const eventCallback = window['on' + eventName.charAt(0).toUpperCase() + eventName.slice(1)];
+    if (typeof eventCallback === 'function') {
+      eventCallback(data);
+    }
   }
 }
 
-// ========== GLOBAL INSTANCE ==========
-const multiplayerEngine = new MultiplayerEngine();
-window.multiplayerEngine = multiplayerEngine;
-console.log('✓ window.multiplayerEngine created');
-
 // ========== INITIALIZE FIREBASE ==========
 function initFirebase() {
-  console.log('🔥 initFirebase() called');
-  console.log('typeof firebase:', typeof firebase);
+  console.log('🔥 Initializing Firebase');
 
   try {
     if (!firebase.apps || firebase.apps.length === 0) {
       app = firebase.initializeApp(firebaseConfig);
-      console.log('✓ Firebase app initialized');
+      console.log('✅ Firebase app initialized');
     } else {
       app = firebase.app();
-      console.log('✓ Firebase app already exists');
+      console.log('✅ Firebase app already exists');
     }
 
     db = firebase.database();
     firebaseReady = true;
-
-    console.log('✅✅✅ Firebase READY!');
-    console.log('Database URL:', firebaseConfig.databaseURL);
-    console.log('db object:', db);
+    console.log('✅ Firebase database ready');
   } catch (e) {
-    console.error('❌ Firebase init error:', e);
-    alert('Firebase initialization failed: ' + e.message);
+    console.error('❌ Firebase init failed:', e);
   }
 }
 
-// ========== SETUP UI ==========
-function setupMultiplayerUI() {
-  console.log('🎨 setupMultiplayerUI() called');
-
-  const container = document.getElementById('multiplayer-modal-container');
-  console.log('Modal container found?', !!container);
-
-  if (!container) {
-    console.error('❌ Modal container #multiplayer-modal-container NOT FOUND!');
-    return;
-  }
-
-  const modalHTML = `
-    <div id="multiplayer-modal" class="hidden">
-      <div class="multiplayer-modal-content">
-        <h2>Multiplayer</h2>
-        
-        <div id="room-selection">
-          <div class="section-header">Create or Join</div>
-          <button id="create-room-btn">Create Room</button>
-          
-          <div class="join-input-group">
-            <input type="text" id="room-id-input" placeholder="Enter Room ID...">
-            <button id="join-room-btn">Join</button>
-          </div>
-        </div>
-        
-        <div id="copy-section" class="hidden">
-          <p>Your Room ID:</p>
-          <p><span id="room-id-display">ROOM00000</span></p>
-          <button id="copy-btn">📋 Copy ID</button>
-        </div>
-        
-        <div id="waiting-section" class="hidden">
-          <p id="waiting-message">⏳ Waiting for opponent to join...</p>
-          <button id="cancel-waiting-btn">Cancel</button>
-        </div>
-        
-        <button id="close-multiplayer-btn" type="button">✕</button>
-      </div>
-    </div>
-  `;
-
-  container.innerHTML = modalHTML;
-  console.log('✓ Modal HTML injected');
-
-  setupMultiplayerHandlers();
-}
-
-// ========== SETUP EVENT HANDLERS ==========
-function setupMultiplayerHandlers() {
-  console.log('🎮 setupMultiplayerHandlers() called');
-
-  const multiplayerBtn = document.getElementById('multiplayer-btn');
-  const modal = document.getElementById('multiplayer-modal');
-  const createBtn = document.getElementById('create-room-btn');
-  const joinBtn = document.getElementById('join-room-btn');
-  const cancelBtn = document.getElementById('cancel-waiting-btn');
-  const closeBtn = document.getElementById('close-multiplayer-btn');
-  const roomDisplay = document.getElementById('room-id-display');
-  const copySection = document.getElementById('copy-section');
-  const roomSelection = document.getElementById('room-selection');
-  const waitingSection = document.getElementById('waiting-section');
-  const copyBtn = document.getElementById('copy-btn');
-  const roomIdInput = document.getElementById('room-id-input');
-
-  // Open modal
-  if (multiplayerBtn && modal) {
-    multiplayerBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      console.log('✓ Multiplayer button clicked');
-      modal.classList.remove('hidden');
-    });
-  }
-
-  // Create room
-  if (createBtn) {
-    createBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      console.log('✓ Create room button clicked');
-
-      multiplayerEngine.createRoom((roomId) => {
-        if (roomId) {
-          console.log('✓ Room created, updating UI...');
-          roomDisplay.textContent = roomId;
-          
-          // Toggle visibility using CSS classes
-          roomSelection.classList.add('hidden');
-          copySection.classList.remove('hidden');
-          waitingSection.classList.remove('hidden');
-          
-          console.log('✓ UI updated - showing copy section and waiting section');
-        }
-      });
-    });
-  }
-
-  // Copy button
-  if (copyBtn) {
-    copyBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const roomId = roomDisplay.textContent;
-      navigator.clipboard.writeText(roomId).then(() => {
-        copyBtn.textContent = '✓ Copied!';
-        setTimeout(() => {
-          copyBtn.textContent = '📋 Copy ID';
-        }, 2000);
-      }).catch(err => {
-        console.error('Failed to copy:', err);
-        alert('Failed to copy room ID');
-      });
-    });
-  }
-
-  // Join room
-  if (joinBtn) {
-    joinBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      const roomId = roomIdInput.value.trim().toUpperCase();
-
-      if (roomId) {
-        console.log('✓ Attempting to join room:', roomId);
-        multiplayerEngine.joinRoom(roomId, (success) => {
-          if (success) {
-            console.log('✓ Join successful, updating UI...');
-            roomSelection.classList.add('hidden');
-            waitingSection.classList.remove('hidden');
-            copySection.classList.add('hidden');
-            console.log('✓ UI updated - showing waiting section');
-          }
-        });
-      } else {
-        alert('Please enter a room ID');
-      }
-    });
-  }
-
-  // Cancel button
-  if (cancelBtn) {
-    cancelBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      console.log('✓ Cancel clicked');
-      multiplayerEngine.disconnect();
-      resetModalUI();
-    });
-  }
-
-  // Close button
-  if (closeBtn) {
-    closeBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      console.log('✓ Close clicked');
-      multiplayerEngine.disconnect();
-      modal.classList.add('hidden');
-      resetModalUI();
-    });
-  }
-
-  // Click outside modal
-  if (modal) {
-    modal.addEventListener('click', (e) => {
-      if (e.target === modal) {
-        console.log('✓ Clicked outside modal');
-        multiplayerEngine.disconnect();
-        modal.classList.add('hidden');
-        resetModalUI();
-      }
-    });
-  }
-
-  // Helper function to reset modal UI
-  function resetModalUI() {
-    roomSelection.classList.remove('hidden');
-    copySection.classList.add('hidden');
-    waitingSection.classList.add('hidden');
-    roomIdInput.value = '';
-    
-    // Reset waiting message
-    const waitingMessage = document.getElementById('waiting-message');
-    if (waitingMessage) {
-      waitingMessage.innerHTML = '⏳ Waiting for opponent to join...';
-      waitingMessage.classList.remove('opponent-connected');
-    }
-    
-    // Show cancel button
-    if (cancelBtn) {
-      cancelBtn.classList.remove('hidden');
-    }
-    
-    // Remove start button if exists
-    const existingStartBtn = document.getElementById('start-race-btn');
-    if (existingStartBtn) {
-      existingStartBtn.remove();
-    }
-  }
-}
-
-// ========== OPPONENT CONNECTED CALLBACK ==========
-window.onOpponentConnected = function() {
-  console.log('✓✓✓ OPPONENT CONNECTED CALLBACK TRIGGERED! ✓✓✓');
-  
-  const waitingSection = document.getElementById('waiting-section');
-  const cancelBtn = document.getElementById('cancel-waiting-btn');
-  const waitingMessage = document.getElementById('waiting-message');
-  
-  if (!waitingSection) {
-    console.error('❌ Waiting section not found!');
-    return;
-  }
-  
-  console.log('✓ Waiting section found, updating UI...');
-  
-  // Update message
-  if (waitingMessage) {
-    waitingMessage.innerHTML = '✅ <strong>Opponent connected!</strong>';
-    waitingMessage.classList.add('opponent-connected');
-    console.log('✓ Message updated');
-  }
-  
-  // Hide cancel button
-  if (cancelBtn) {
-    cancelBtn.classList.add('hidden');
-    console.log('✓ Cancel button hidden');
-  }
-  
-  // Add Start Race button (only if it doesn't exist)
-  const existingStartBtn = document.getElementById('start-race-btn');
-  if (!existingStartBtn) {
-    console.log('✓ Creating Start Race button...');
-    const startBtn = document.createElement('button');
-    startBtn.id = 'start-race-btn';
-    startBtn.className = 'start-race-btn';
-    startBtn.textContent = 'Start Race!';
-    
-    startBtn.addEventListener('click', () => {
-      console.log('🏁 START RACE CLICKED!');
-      
-      // Close modal
-      const modal = document.getElementById('multiplayer-modal');
-      if (modal) {
-        modal.classList.add('hidden');
-        console.log('✓ Modal closed');
-      }
-      
-      // Reset UI for next time
-      const roomSelection = document.getElementById('room-selection');
-      const copySection = document.getElementById('copy-section');
-      
-      roomSelection.classList.remove('hidden');
-      copySection.classList.add('hidden');
-      waitingSection.classList.add('hidden');
-      cancelBtn.classList.remove('hidden');
-      
-      // Reset message
-      if (waitingMessage) {
-        waitingMessage.innerHTML = '⏳ Waiting for opponent to join...';
-        waitingMessage.classList.remove('opponent-connected');
-      }
-      
-      // Remove start button
-      startBtn.remove();
-      
-      // Focus on typing input to start race
-      const userInput = document.getElementById('user-input');
-      if (userInput) {
-        userInput.focus();
-        console.log('✓ Race started! Input focused.');
-      }
-      
-      // Optional: Add a countdown
-      let countdown = 3;
-      const timerDisplay = document.getElementById('timer');
-      const countdownInterval = setInterval(() => {
-        if (timerDisplay) {
-          timerDisplay.textContent = countdown;
-        }
-        countdown--;
-        
-        if (countdown < 0) {
-          clearInterval(countdownInterval);
-          if (timerDisplay) {
-            timerDisplay.textContent = '30';
-          }
-          console.log('✓ Countdown complete! GO!');
-        }
-      }, 1000);
-    });
-    
-    waitingSection.appendChild(startBtn);
-    console.log('✓ Start Race button added to DOM');
-  } else {
-    console.log('⚠ Start Race button already exists');
-  }
-};
-
-// ========== OPPONENT STATS UPDATE ==========
-window.onOpponentStatsUpdate = function(stats) {
-  console.log('📊 Opponent stats:', stats);
-  // You can add UI here to show opponent's WPM/progress
-};
-
-// ========== INITIALIZE ON DOM LOAD ==========
-document.addEventListener('DOMContentLoaded', () => {
-  console.log('✓ DOM loaded');
-  
-  if (typeof firebase === 'undefined') {
-    console.error('❌ Firebase SDK not loaded!');
-    return;
-  }
-  
+// ========== AUTO-INITIALIZE ==========
+if (typeof firebase !== 'undefined') {
   initFirebase();
-  setupMultiplayerUI();
-});
+} else {
+  document.addEventListener('DOMContentLoaded', () => {
+    if (typeof firebase !== 'undefined') {
+      initFirebase();
+    }
+  });
+}
+
+// ========== EXPORT GLOBAL INSTANCE ==========
+window.multiplayerEngine = new MultiplayerEngine();
+console.log('✅ multiplayerEngine available globally');

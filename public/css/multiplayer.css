@@ -1,306 +1,594 @@
-/* ========== MULTIPLAYER MODAL STYLES ========== */
+/* ========== MULTIPLAYER RACE STYLES ========== */
 
-#multiplayer-modal {
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    width: 100% !important;
-    height: 100% !important;
-    background: rgba(0, 0, 0, 0.9) !important;
-    z-index: 9999 !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-family: 'Roboto Mono', monospace !important;
+/* Phase containers */
+.mp-phase {
+    opacity: 0;
+    animation: fadeIn 0.3s ease forwards;
 }
 
-#multiplayer-modal.hidden {
-    display: none !important;
+@keyframes fadeIn {
+    to { opacity: 1; }
 }
 
-.multiplayer-modal-content {
-    background: #323437 !important;
-    border: 3px solid #e2b714 !important;
-    border-radius: 8px !important;
-    padding: 40px !important;
-    width: 85% !important;
-    max-width: 500px !important;
-    color: #d1d0c5 !important;
-    position: relative !important;
-    box-shadow: 0 0 40px rgba(0, 0, 0, 0.95) !important;
-    max-height: 80vh !important;
-    overflow-y: auto !important;
+.mp-phase.hidden {
+    display: none;
 }
 
-.multiplayer-modal-content h2 {
-    margin: 0 0 30px 0 !important;
-    color: #e2b714 !important;
-    text-align: center !important;
-    font-size: 32px !important;
-    font-weight: 600 !important;
-    letter-spacing: 2px !important;
+/* Card container */
+.mp-card {
+    background: var(--bg-secondary);
+    border: 2px solid var(--accent-color);
+    border-radius: 8px;
+    padding: 40px;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
-/* Room Selection Section */
-#room-selection {
-    margin-bottom: 30px !important;
-    display: block !important;
+/* Typography */
+.mp-title {
+    font-size: 32px;
+    font-weight: 600;
+    color: var(--accent-color);
+    text-align: center;
+    margin: 0 0 10px 0;
+    letter-spacing: 1px;
 }
 
-#room-selection.hidden {
-    display: none !important;
+.mp-subtitle {
+    font-size: 14px;
+    color: var(--text-secondary);
+    text-align: center;
+    margin: 0 0 30px 0;
 }
 
-.section-header {
-    font-size: 11px !important;
-    color: #b8bb26 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 3px !important;
-    margin-bottom: 20px !important;
-    font-weight: 700 !important;
+.mp-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 600;
 }
 
-#create-room-btn {
-    background: #e2b714 !important;
-    color: #323437 !important;
-    border: none !important;
-    padding: 14px 24px !important;
-    border-radius: 4px !important;
-    font-family: 'Roboto Mono', monospace !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    width: 100% !important;
-    margin-bottom: 16px !important;
-    font-size: 14px !important;
-    transition: all 0.2s !important;
-    display: block !important;
+/* Buttons */
+.mp-btn {
+    padding: 12px 24px;
+    border-radius: 4px;
+    font-family: 'Roboto Mono', monospace;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    transition: all 0.2s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
 }
 
-#create-room-btn:hover {
-    opacity: 0.9 !important;
-    transform: translateY(-1px) !important;
+.mp-btn-primary {
+    background: var(--accent-color);
+    color: var(--bg-primary);
 }
 
-.join-input-group {
-    display: flex !important;
-    gap: 10px !important;
-    margin-bottom: 16px !important;
+.mp-btn-primary:hover {
+    opacity: 0.9;
+    transform: translateY(-1px);
 }
 
-#room-id-input {
-    flex: 1 !important;
-    background: #2c2e31 !important;
-    border: 1px solid #646669 !important;
-    color: #d1d0c5 !important;
-    padding: 12px !important;
-    border-radius: 4px !important;
-    font-family: 'Roboto Mono', monospace !important;
-    font-size: 13px !important;
-    display: block !important;
+.mp-btn-secondary {
+    background: var(--bg-primary);
+    color: var(--text-primary);
+    border: 1px solid var(--text-secondary);
 }
 
-#room-id-input::placeholder {
-    color: #646669 !important;
+.mp-btn-secondary:hover {
+    border-color: var(--accent-color);
+    color: var(--accent-color);
 }
 
-#room-id-input:focus {
-    outline: none !important;
-    border-color: #e2b714 !important;
+.mp-btn-large {
+    padding: 16px 32px;
+    font-size: 16px;
+    width: 100%;
 }
 
-#join-room-btn {
-    background: #e2b714 !important;
-    color: #323437 !important;
-    border: none !important;
-    padding: 12px 20px !important;
-    border-radius: 4px !important;
-    font-family: 'Roboto Mono', monospace !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    font-size: 13px !important;
-    display: block !important;
-    transition: all 0.2s !important;
+.mp-btn-small {
+    padding: 8px 16px;
+    font-size: 12px;
 }
 
-#join-room-btn:hover {
-    opacity: 0.9 !important;
-    transform: translateY(-1px) !important;
+.mp-btn-icon {
+    width: 20px;
+    height: 20px;
 }
 
-/* Copy Section */
-#copy-section {
-    background: #2c2e31 !important;
-    padding: 20px !important;
-    border-radius: 6px !important;
-    border: 2px solid #646669 !important;
-    display: block !important;
-    margin-bottom: 20px !important;
+.mp-btn-icon-small {
+    width: 16px;
+    height: 16px;
 }
 
-#copy-section.hidden {
-    display: none !important;
+.mp-btn.hidden {
+    display: none;
 }
 
-#copy-section p {
-    margin: 0 0 12px 0 !important;
-    font-size: 11px !important;
-    color: #888888 !important;
-    text-transform: uppercase !important;
-    letter-spacing: 1px !important;
-    font-weight: 600 !important;
+/* Inputs */
+.mp-input {
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--bg-primary);
+    border: 1px solid var(--text-secondary);
+    border-radius: 4px;
+    color: var(--text-primary);
+    font-family: 'Roboto Mono', monospace;
+    font-size: 14px;
+    transition: all 0.2s;
 }
 
-#room-id-display {
-    font-size: 24px !important;
-    color: #e2b714 !important;
-    font-weight: bold !important;
-    word-break: break-all !important;
-    text-align: center !important;
-    letter-spacing: 1px !important;
-    display: block !important;
+.mp-input:focus {
+    outline: none;
+    border-color: var(--accent-color);
 }
 
-#copy-btn {
-    background: #e2b714 !important;
-    color: #323437 !important;
-    border: none !important;
-    padding: 12px 24px !important;
-    border-radius: 4px !important;
-    font-family: 'Roboto Mono', monospace !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    width: 100% !important;
-    font-size: 14px !important;
-    display: block !important;
-    transition: all 0.2s !important;
+.mp-input::placeholder {
+    color: var(--text-secondary);
+    opacity: 0.6;
 }
 
-#copy-btn:hover {
-    opacity: 0.9 !important;
-    transform: translateY(-1px) !important;
+/* Actions container */
+.mp-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
-/* Waiting Section */
-#waiting-section {
-    text-align: center !important;
-    display: block !important;
-    padding: 20px 0 !important;
+.mp-divider {
+    text-align: center;
+    position: relative;
+    margin: 20px 0;
 }
 
-#waiting-section.hidden {
-    display: none !important;
+.mp-divider::before,
+.mp-divider::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    width: 45%;
+    height: 1px;
+    background: var(--text-secondary);
+    opacity: 0.3;
 }
 
-#waiting-section p,
-#waiting-message {
-    margin: 0 0 20px 0 !important;
-    color: #888888 !important;
-    font-size: 14px !important;
-    display: block !important;
+.mp-divider::before {
+    left: 0;
 }
 
-#waiting-message.opponent-connected {
-    color: #4ade80 !important;
-    font-size: 18px !important;
-    margin-bottom: 20px !important;
+.mp-divider::after {
+    right: 0;
 }
 
-#cancel-waiting-btn {
-    background: #2c2e31 !important;
-    color: #e2b714 !important;
-    border: 2px solid #e2b714 !important;
-    padding: 12px 24px !important;
-    border-radius: 4px !important;
-    font-family: 'Roboto Mono', monospace !important;
-    font-weight: 600 !important;
-    cursor: pointer !important;
-    width: 100% !important;
-    font-size: 14px !important;
-    transition: all 0.2s !important;
-    display: block !important;
+.mp-divider span {
+    color: var(--text-secondary);
+    font-size: 12px;
+    background: var(--bg-secondary);
+    padding: 0 12px;
+    position: relative;
 }
 
-#cancel-waiting-btn:hover {
-    background: #3a3c3f !important;
-    transform: translateY(-1px) !important;
+.mp-join-group {
+    display: flex;
+    gap: 10px;
 }
 
-#cancel-waiting-btn.hidden {
-    display: none !important;
+.mp-back {
+    text-align: center;
+    margin-top: 30px;
 }
 
-/* Start Race Button */
-.start-race-btn,
-#start-race-btn {
-    background: #e2b714 !important;
-    color: #323437 !important;
-    border: none !important;
-    padding: 16px 32px !important;
-    border-radius: 4px !important;
-    font-family: 'Roboto Mono', monospace !important;
-    font-weight: 700 !important;
-    font-size: 18px !important;
-    cursor: pointer !important;
-    width: 100% !important;
-    transition: all 0.2s !important;
-    text-transform: uppercase !important;
-    letter-spacing: 2px !important;
-    margin-top: 10px !important;
-    display: block !important;
+.mp-link {
+    color: var(--text-secondary);
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.2s;
 }
 
-.start-race-btn:hover,
-#start-race-btn:hover {
-    opacity: 0.9 !important;
-    transform: translateY(-2px) !important;
-    box-shadow: 0 4px 12px rgba(226, 183, 20, 0.4) !important;
+.mp-link:hover {
+    color: var(--accent-color);
 }
 
-/* Close Button */
-#close-multiplayer-btn {
-    position: absolute !important;
-    top: 16px !important;
-    right: 16px !important;
-    background: none !important;
-    border: none !important;
-    color: #e2b714 !important;
-    font-size: 32px !important;
-    cursor: pointer !important;
-    padding: 0 !important;
-    width: 40px !important;
-    height: 40px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    border-radius: 4px !important;
-    transition: all 0.2s !important;
-    z-index: 10001 !important;
-    line-height: 1 !important;
+/* Room Info */
+.mp-room-info {
+    background: var(--bg-primary);
+    border: 1px solid var(--text-secondary);
+    border-radius: 4px;
+    padding: 16px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
-#close-multiplayer-btn:hover {
-    background: #2c2e31 !important;
-    transform: rotate(90deg) !important;
+.mp-room-id-container {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.mp-room-id {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--accent-color);
+    letter-spacing: 1px;
+}
+
+/* Players Grid */
+.mp-players-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.mp-player-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--text-secondary);
+    border-radius: 4px;
+    padding: 20px;
+    text-align: center;
+    transition: all 0.2s;
+}
+
+.mp-player-card.mp-player-local {
+    border-color: var(--accent-color);
+}
+
+.mp-player-avatar {
+    width: 48px;
+    height: 48px;
+    margin: 0 auto 12px;
+    color: var(--text-secondary);
+}
+
+.mp-player-avatar svg {
+    width: 100%;
+    height: 100%;
+}
+
+.mp-player-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+}
+
+.mp-player-status {
+    font-size: 12px;
+    color: var(--text-secondary);
+    padding: 4px 12px;
+    border-radius: 12px;
+    background: var(--bg-secondary);
+}
+
+.mp-status-ready {
+    color: #4ade80;
+    background: rgba(74, 222, 128, 0.1);
+}
+
+/* Countdown Overlay */
+.mp-countdown-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    animation: fadeIn 0.3s ease;
+}
+
+.mp-countdown-overlay.hidden {
+    display: none;
+}
+
+.mp-countdown-bg {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: var(--bg-primary);
+    opacity: 0.95;
+}
+
+.mp-countdown-content {
+    position: relative;
+    text-align: center;
+}
+
+.mp-countdown-text {
+    font-size: 24px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+}
+
+.mp-countdown-number {
+    font-size: 120px;
+    font-weight: 700;
+    color: var(--accent-color);
+    line-height: 1;
+}
+
+.mp-countdown-pulse {
+    animation: pulse 0.3s ease;
+}
+
+.mp-countdown-go {
+    animation: scaleUp 0.5s ease;
+}
+
+@keyframes pulse {
+    0%, 100% { transform: scale(1); }
+    50% { transform: scale(1.1); }
+}
+
+@keyframes scaleUp {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(1.5); opacity: 0; }
+}
+
+/* Race Progress */
+.mp-race-progress {
+    margin-bottom: 30px;
+}
+
+.mp-progress-item {
+    margin-bottom: 20px;
+}
+
+.mp-progress-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.mp-progress-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.mp-progress-icon {
+    font-size: 18px;
+}
+
+.mp-words-count {
+    font-size: 14px;
+    color: var(--text-secondary);
+    font-weight: 600;
+}
+
+.mp-progress-bar {
+    height: 24px;
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--text-secondary);
+}
+
+.mp-progress-fill {
+    height: 100%;
+    background: var(--accent-color);
+    transition: width 0.2s ease;
+    border-radius: 12px;
+}
+
+.mp-progress-opponent {
+    background: var(--text-secondary);
+}
+
+/* Race Stats */
+.mp-race-stats {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    margin-bottom: 30px;
+}
+
+.mp-stat-item {
+    text-align: center;
+}
+
+.mp-stat-value {
+    font-size: 36px;
+    font-weight: 600;
+    color: var(--accent-color);
+    line-height: 1;
+    margin-bottom: 4px;
+}
+
+.mp-stat-label {
+    font-size: 12px;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* Typing Area */
+.mp-typing-area {
+    background: var(--bg-secondary);
+    border: 2px solid var(--text-secondary);
+    border-radius: 8px;
+    padding: 30px;
+    min-height: 200px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.mp-text-display {
+    font-size: 20px;
+    line-height: 2;
+    color: var(--text-secondary);
+    text-align: center;
+    word-wrap: break-word;
+}
+
+.mp-word {
+    display: inline-block;
+    margin: 0 8px;
+}
+
+.mp-word-active {
+    border-bottom: 2px solid var(--accent-color);
+}
+
+.mp-char {
+    transition: color 0.1s;
+}
+
+.mp-char-correct {
+    color: var(--text-primary);
+}
+
+.mp-char-incorrect {
+    color: var(--error-color);
+}
+
+.mp-hidden-input {
+    position: absolute;
+    left: -9999px;
+    opacity: 0;
+}
+
+/* Results */
+.mp-results-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 30px;
+}
+
+.mp-result-card {
+    background: var(--bg-primary);
+    border: 1px solid var(--text-secondary);
+    border-radius: 8px;
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+    transition: all 0.2s;
+}
+
+.mp-result-card:hover {
+    transform: translateX(4px);
+}
+
+.mp-result-local {
+    border-color: var(--accent-color);
+    border-width: 2px;
+}
+
+.mp-result-winner {
+    background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+    border-color: var(--accent-color);
+    border-width: 2px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+}
+
+.mp-result-rank {
+    font-size: 32px;
+    font-weight: 700;
+    color: var(--accent-color);
+    min-width: 60px;
+    text-align: center;
+}
+
+.mp-result-info {
+    flex: 1;
+}
+
+.mp-result-name {
+    font-size: 18px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.mp-result-badge {
+    font-size: 11px;
+    padding: 2px 8px;
+    background: var(--accent-color);
+    color: var(--bg-primary);
+    border-radius: 4px;
+    font-weight: 700;
+}
+
+.mp-result-stats {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.mp-result-stat {
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.mp-result-stat strong {
+    color: var(--text-primary);
+    font-weight: 600;
 }
 
 /* Responsive */
-@media (max-width: 600px) {
-    .multiplayer-modal-content {
-        width: 95% !important;
-        padding: 30px 20px !important;
+@media (max-width: 768px) {
+    .mp-card {
+        padding: 24px;
     }
 
-    .multiplayer-modal-content h2 {
-        font-size: 24px !important;
+    .mp-title {
+        font-size: 24px;
     }
 
-    #room-id-display {
-        font-size: 18px !important;
+    .mp-players-grid {
+        grid-template-columns: 1fr;
     }
 
-    .start-race-btn,
-    #start-race-btn {
-        font-size: 16px !important;
-        padding: 14px 28px !important;
+    .mp-race-stats {
+        gap: 24px;
+    }
+
+    .mp-stat-value {
+        font-size: 28px;
+    }
+
+    .mp-text-display {
+        font-size: 16px;
+    }
+
+    .mp-countdown-number {
+        font-size: 80px;
+    }
+
+    .mp-result-card {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .mp-result-rank {
+        font-size: 24px;
+    }
+
+    .mp-result-stats {
+        justify-content: center;
     }
 }
