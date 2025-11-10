@@ -8,7 +8,7 @@
     height: 100% !important;
     background: rgba(0, 0, 0, 0.9) !important;
     z-index: 9999 !important;
-    display: none !important;
+    display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     font-family: 'Roboto Mono', monospace !important;
@@ -16,10 +16,6 @@
 
 #multiplayer-modal.hidden {
     display: none !important;
-}
-
-#multiplayer-modal:not(.hidden) {
-    display: flex !important;
 }
 
 .multiplayer-modal-content {
@@ -45,9 +41,14 @@
     letter-spacing: 2px !important;
 }
 
+/* Room Selection Section */
 #room-selection {
     margin-bottom: 30px !important;
     display: block !important;
+}
+
+#room-selection.hidden {
+    display: none !important;
 }
 
 .section-header {
@@ -75,6 +76,11 @@
     display: block !important;
 }
 
+#create-room-btn:hover {
+    opacity: 0.9 !important;
+    transform: translateY(-1px) !important;
+}
+
 .join-input-group {
     display: flex !important;
     gap: 10px !important;
@@ -93,6 +99,15 @@
     display: block !important;
 }
 
+#room-id-input::placeholder {
+    color: #646669 !important;
+}
+
+#room-id-input:focus {
+    outline: none !important;
+    border-color: #e2b714 !important;
+}
+
 #join-room-btn {
     background: #e2b714 !important;
     color: #323437 !important;
@@ -104,15 +119,26 @@
     cursor: pointer !important;
     font-size: 13px !important;
     display: block !important;
+    transition: all 0.2s !important;
 }
 
+#join-room-btn:hover {
+    opacity: 0.9 !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Copy Section */
 #copy-section {
     background: #2c2e31 !important;
     padding: 20px !important;
     border-radius: 6px !important;
     border: 2px solid #646669 !important;
-    display: none !important;
+    display: block !important;
     margin-bottom: 20px !important;
+}
+
+#copy-section.hidden {
+    display: none !important;
 }
 
 #copy-section p {
@@ -146,19 +172,37 @@
     width: 100% !important;
     font-size: 14px !important;
     display: block !important;
+    transition: all 0.2s !important;
 }
 
+#copy-btn:hover {
+    opacity: 0.9 !important;
+    transform: translateY(-1px) !important;
+}
+
+/* Waiting Section */
 #waiting-section {
     text-align: center !important;
-    display: none !important;
+    display: block !important;
     padding: 20px 0 !important;
 }
 
-#waiting-section p {
+#waiting-section.hidden {
+    display: none !important;
+}
+
+#waiting-section p,
+#waiting-message {
     margin: 0 0 20px 0 !important;
     color: #888888 !important;
     font-size: 14px !important;
     display: block !important;
+}
+
+#waiting-message.opponent-connected {
+    color: #4ade80 !important;
+    font-size: 18px !important;
+    margin-bottom: 20px !important;
 }
 
 #cancel-waiting-btn {
@@ -176,6 +220,43 @@
     display: block !important;
 }
 
+#cancel-waiting-btn:hover {
+    background: #3a3c3f !important;
+    transform: translateY(-1px) !important;
+}
+
+#cancel-waiting-btn.hidden {
+    display: none !important;
+}
+
+/* Start Race Button */
+.start-race-btn,
+#start-race-btn {
+    background: #e2b714 !important;
+    color: #323437 !important;
+    border: none !important;
+    padding: 16px 32px !important;
+    border-radius: 4px !important;
+    font-family: 'Roboto Mono', monospace !important;
+    font-weight: 700 !important;
+    font-size: 18px !important;
+    cursor: pointer !important;
+    width: 100% !important;
+    transition: all 0.2s !important;
+    text-transform: uppercase !important;
+    letter-spacing: 2px !important;
+    margin-top: 10px !important;
+    display: block !important;
+}
+
+.start-race-btn:hover,
+#start-race-btn:hover {
+    opacity: 0.9 !important;
+    transform: translateY(-2px) !important;
+    box-shadow: 0 4px 12px rgba(226, 183, 20, 0.4) !important;
+}
+
+/* Close Button */
 #close-multiplayer-btn {
     position: absolute !important;
     top: 16px !important;
@@ -195,4 +276,31 @@
     transition: all 0.2s !important;
     z-index: 10001 !important;
     line-height: 1 !important;
+}
+
+#close-multiplayer-btn:hover {
+    background: #2c2e31 !important;
+    transform: rotate(90deg) !important;
+}
+
+/* Responsive */
+@media (max-width: 600px) {
+    .multiplayer-modal-content {
+        width: 95% !important;
+        padding: 30px 20px !important;
+    }
+
+    .multiplayer-modal-content h2 {
+        font-size: 24px !important;
+    }
+
+    #room-id-display {
+        font-size: 18px !important;
+    }
+
+    .start-race-btn,
+    #start-race-btn {
+        font-size: 16px !important;
+        padding: 14px 28px !important;
+    }
 }

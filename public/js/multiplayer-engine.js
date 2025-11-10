@@ -238,14 +238,14 @@ function setupMultiplayerUI() {
           </div>
         </div>
         
-        <div id="copy-section" style="display: none;">
+        <div id="copy-section" class="hidden">
           <p>Your Room ID:</p>
           <p><span id="room-id-display">ROOM00000</span></p>
           <button id="copy-btn">📋 Copy ID</button>
         </div>
         
-        <div id="waiting-section" style="display: none;">
-          <p>⏳ Waiting for opponent to join...</p>
+        <div id="waiting-section" class="hidden">
+          <p id="waiting-message">⏳ Waiting for opponent to join...</p>
           <button id="cancel-waiting-btn">Cancel</button>
         </div>
         
@@ -297,10 +297,10 @@ function setupMultiplayerHandlers() {
           console.log('✓ Room created, updating UI...');
           roomDisplay.textContent = roomId;
           
-          // Use inline styles to ensure visibility
-          roomSelection.style.display = 'none';
-          copySection.style.display = 'block';
-          waitingSection.style.display = 'block';
+          // Toggle visibility using CSS classes
+          roomSelection.classList.add('hidden');
+          copySection.classList.remove('hidden');
+          waitingSection.classList.remove('hidden');
           
           console.log('✓ UI updated - showing copy section and waiting section');
         }
@@ -336,9 +336,9 @@ function setupMultiplayerHandlers() {
         multiplayerEngine.joinRoom(roomId, (success) => {
           if (success) {
             console.log('✓ Join successful, updating UI...');
-            roomSelection.style.display = 'none';
-            waitingSection.style.display = 'block';
-            copySection.style.display = 'none';
+            roomSelection.classList.add('hidden');
+            waitingSection.classList.remove('hidden');
+            copySection.classList.add('hidden');
             console.log('✓ UI updated - showing waiting section');
           }
         });
@@ -354,10 +354,7 @@ function setupMultiplayerHandlers() {
       e.preventDefault();
       console.log('✓ Cancel clicked');
       multiplayerEngine.disconnect();
-      roomSelection.style.display = 'block';
-      copySection.style.display = 'none';
-      waitingSection.style.display = 'none';
-      roomIdInput.value = '';
+      resetModalUI();
     });
   }
 
@@ -368,10 +365,7 @@ function setupMultiplayerHandlers() {
       console.log('✓ Close clicked');
       multiplayerEngine.disconnect();
       modal.classList.add('hidden');
-      roomSelection.style.display = 'block';
-      copySection.style.display = 'none';
-      waitingSection.style.display = 'none';
-      roomIdInput.value = '';
+      resetModalUI();
     });
   }
 
@@ -382,12 +376,35 @@ function setupMultiplayerHandlers() {
         console.log('✓ Clicked outside modal');
         multiplayerEngine.disconnect();
         modal.classList.add('hidden');
-        roomSelection.style.display = 'block';
-        copySection.style.display = 'none';
-        waitingSection.style.display = 'none';
-        roomIdInput.value = '';
+        resetModalUI();
       }
     });
+  }
+
+  // Helper function to reset modal UI
+  function resetModalUI() {
+    roomSelection.classList.remove('hidden');
+    copySection.classList.add('hidden');
+    waitingSection.classList.add('hidden');
+    roomIdInput.value = '';
+    
+    // Reset waiting message
+    const waitingMessage = document.getElementById('waiting-message');
+    if (waitingMessage) {
+      waitingMessage.innerHTML = '⏳ Waiting for opponent to join...';
+      waitingMessage.classList.remove('opponent-connected');
+    }
+    
+    // Show cancel button
+    if (cancelBtn) {
+      cancelBtn.classList.remove('hidden');
+    }
+    
+    // Remove start button if exists
+    const existingStartBtn = document.getElementById('start-race-btn');
+    if (existingStartBtn) {
+      existingStartBtn.remove();
+    }
   }
 }
 
@@ -397,6 +414,7 @@ window.onOpponentConnected = function() {
   
   const waitingSection = document.getElementById('waiting-section');
   const cancelBtn = document.getElementById('cancel-waiting-btn');
+  const waitingMessage = document.getElementById('waiting-message');
   
   if (!waitingSection) {
     console.error('❌ Waiting section not found!');
@@ -406,18 +424,15 @@ window.onOpponentConnected = function() {
   console.log('✓ Waiting section found, updating UI...');
   
   // Update message
-  const msg = waitingSection.querySelector('p');
-  if (msg) {
-    msg.innerHTML = '✅ <strong>Opponent connected!</strong>';
-    msg.style.color = '#4ade80';
-    msg.style.fontSize = '18px';
-    msg.style.marginBottom = '20px';
+  if (waitingMessage) {
+    waitingMessage.innerHTML = '✅ <strong>Opponent connected!</strong>';
+    waitingMessage.classList.add('opponent-connected');
     console.log('✓ Message updated');
   }
   
   // Hide cancel button
   if (cancelBtn) {
-    cancelBtn.style.display = 'none';
+    cancelBtn.classList.add('hidden');
     console.log('✓ Cancel button hidden');
   }
   
@@ -427,23 +442,8 @@ window.onOpponentConnected = function() {
     console.log('✓ Creating Start Race button...');
     const startBtn = document.createElement('button');
     startBtn.id = 'start-race-btn';
+    startBtn.className = 'start-race-btn';
     startBtn.textContent = 'Start Race!';
-    startBtn.style.cssText = `
-      background: #e2b714 !important;
-      color: #323437 !important;
-      border: none !important;
-      padding: 16px 32px !important;
-      border-radius: 4px !important;
-      font-family: 'Roboto Mono', monospace !important;
-      font-weight: 700 !important;
-      font-size: 18px !important;
-      cursor: pointer !important;
-      width: 100% !important;
-      transition: all 0.2s !important;
-      text-transform: uppercase !important;
-      letter-spacing: 2px !important;
-      margin-top: 10px !important;
-    `;
     
     startBtn.addEventListener('click', () => {
       console.log('🏁 START RACE CLICKED!');
@@ -455,23 +455,23 @@ window.onOpponentConnected = function() {
         console.log('✓ Modal closed');
       }
       
-      // Reset UI
+      // Reset UI for next time
       const roomSelection = document.getElementById('room-selection');
       const copySection = document.getElementById('copy-section');
-      if (roomSelection) roomSelection.style.display = 'block';
-      if (copySection) copySection.style.display = 'none';
-      if (waitingSection) waitingSection.style.display = 'none';
-      if (cancelBtn) cancelBtn.style.display = 'block';
       
-      // Remove start button for next time
-      startBtn.remove();
+      roomSelection.classList.remove('hidden');
+      copySection.classList.add('hidden');
+      waitingSection.classList.add('hidden');
+      cancelBtn.classList.remove('hidden');
       
       // Reset message
-      if (msg) {
-        msg.innerHTML = '⏳ Waiting for opponent to join...';
-        msg.style.color = '';
-        msg.style.fontSize = '';
+      if (waitingMessage) {
+        waitingMessage.innerHTML = '⏳ Waiting for opponent to join...';
+        waitingMessage.classList.remove('opponent-connected');
       }
+      
+      // Remove start button
+      startBtn.remove();
       
       // Focus on typing input to start race
       const userInput = document.getElementById('user-input');
