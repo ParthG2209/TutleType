@@ -1,4 +1,3 @@
-
 // ========== MULTIPLAYER RACE UI CONTROLLER ==========
 console.log('🎮 multiplayer-race.js loaded');
 
@@ -141,9 +140,9 @@ function setupEventHandlers() {
     showPhase('room-setup');
   });
 
-  // Back to Home
+  // Back to Home - FIXED: Correct path since we're in public folder
   document.getElementById('back-home-btn')?.addEventListener('click', () => {
-    window.location.href = '/';
+    window.location.href = 'index.html';
   });
 }
 
