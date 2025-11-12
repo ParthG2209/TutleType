@@ -62,7 +62,7 @@ document.querySelectorAll('.tab-button').forEach(button => {
         // Handle multiplayer tab - redirect to multiplayer.html
         if (tab === 'multi') {
             e.preventDefault();
-            window.location.href = 'public/multiplayer.html';
+            window.location.href = 'multiplayer.html';
             return;
         }
         
